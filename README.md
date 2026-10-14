@@ -109,6 +109,13 @@ Máy chủ container ứng dụng mô phỏng chuỗi tấn công thực chiến
   # Kết quả: root | uid=0(root) gid=0(root) groups=0(root)
   ```
 
+### 🛡️ Cơ Chế Phân Quyền Tối Thiểu (Principle of Least Privilege)
+Hệ thống được thiết lập theo đúng chuẩn mực bảo mật Linux Server trong môi trường thực tế:
+* **Mã nguồn ứng dụng (`/var/www/html`):** Thuộc sở hữu của `root:root`. Toàn bộ thư mục được phân quyền `755` (`drwxr-xr-x`), tệp mã nguồn là `644` (`-rw-r--r--`). Tiến trình Apache (`www-data`) **chỉ có quyền đọc (Read-Only)**, tuyệt đối không thể sửa đổi hay ghi đè bất kỳ file code nào.
+* **Thư mục duy nhất có quyền ghi (`uploads/`):** Được cấp quyền ghi cho `www-data` và MySQL để phục vụ tính năng upload tệp nghiệp vụ và nhận webshell từ `INTO OUTFILE`.
+* **Thư mục quản trị Root (`/root`, `/root/.ssh`):** Khóa quyền nghiêm ngặt theo chuẩn DAC (`700`), ngăn chặn hoàn toàn việc `www-data` đọc/ghi trực tiếp SSH keys.
+* **SUID Bypassing DAC:** Dù hệ thống phân quyền tối thiểu, kẻ tấn công vẫn leo quyền thành công 100% nhờ lợi dụng cờ SUID `euid=0` của `/usr/bin/env install` để tạo `authorized_keys` (0600) thuộc sở hữu của `root`.
+
 ---
 
 ## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy (Quickstart)

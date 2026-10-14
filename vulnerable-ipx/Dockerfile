@@ -42,9 +42,11 @@ RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 RUN echo 'AddType text/html .html .shtml .xhtml' >> /etc/apache2/apache2.conf \
     && echo 'AddType image/svg+xml .svg .svgz' >> /etc/apache2/apache2.conf
 
-# Tạo thư mục uploads và phân quyền
+# Tạo thư mục uploads và áp dụng nguyên tắc phân quyền tối thiểu (Least Privilege)
 RUN mkdir -p /var/www/html/public/uploads /app/uploads \
-    && chown -R www-data:www-data /var/www/html \
+    && chown -R root:root /var/www/html \
+    && find /var/www/html -type d -exec chmod 755 {} + \
+    && find /var/www/html -type f -exec chmod 644 {} + \
     && chmod -R 777 /app/uploads /var/www/html/public/uploads
 
 WORKDIR /var/www/html

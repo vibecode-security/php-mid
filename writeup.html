@@ -827,12 +827,12 @@ Tệp tin đã sẵn sàng truy cập tại: http://localhost:3000/uploads/xin_c
                         <pre><code>GET /product?id=-1%20UNION%20SELECT%20'&lt;script_code&gt;','','',''%20INTO%20OUTFILE%20'/app/uploads/shell.php'--%20- HTTP/1.1
 Host: localhost:3000</code></pre>
 
-                        <h4 style="margin-top: 14px;">Bước 3 &mdash; Ngữ cảnh thực thi Web (www-data) &amp; Rào cản bảo vệ:</h4>
+                        <h4 style="margin-top: 14px;">Bước 3 &mdash; Ngữ cảnh thực thi Web (www-data) &amp; Rào cản bảo vệ (Least Privilege):</h4>
                         <p>Khi tệp tin được kích hoạt qua giao thức HTTP, tiến trình thực thi mang danh tính tài khoản dịch vụ mạng:</p>
                         <div class="terminal info">
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
                         </div>
-                        <p>👉 <strong>Rào cản an ninh:</strong> Tài khoản <code>www-data</code> bị hệ điều hành Linux chặn truy cập thư mục của quản trị viên (<code>/root/.ssh/</code>), không thể trực tiếp đọc tệp nhạy cảm hoặc ghi khóa xác thực SSH do bị giới hạn bởi quyền hạn tối thiểu (Discretionary Access Control).</p>
+                        <p>👉 <strong>Rào cản an ninh (Principle of Least Privilege):</strong> Toàn bộ mã nguồn web tại <code>/var/www/html/</code> được thiết lập quyền hạn tối thiểu (thư mục: <code>755</code>, tệp tin: <code>644</code>, chủ sở hữu: <code>root:root</code>), tài khoản <code>www-data</code> hoàn toàn <strong>không có quyền sửa đổi hay ghi đè bất kỳ file code nào</strong> (chỉ có thư mục <code>uploads/</code> là có quyền ghi nghiệp vụ). Đồng thời, <code>www-data</code> bị hệ điều hành Linux (DAC) chặn tuyệt đối quyền truy cập vào thư mục của quản trị viên (<code>/root/.ssh/</code>), không thể trực tiếp ghi khóa xác thực SSH.</p>
 
                         <h4 style="margin-top: 14px;">Bước 4 &mdash; Leo thang đặc quyền cài đặt SSH Key qua SUID binary (/usr/bin/env):</h4>
                         <p>

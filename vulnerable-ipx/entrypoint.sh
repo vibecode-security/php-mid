@@ -108,7 +108,18 @@ if ! grep -q "StrictModes no" /etc/ssh/sshd_config; then
     echo "StrictModes no" >> /etc/ssh/sshd_config
 fi
 
-# 9. Phân quyền thư mục .ssh để MySQL có thể ghi SSH key qua INTO OUTFILE
+# 9. Thiết lập nguyên tắc đặc quyền tối thiểu (Least Privilege) cho toàn bộ Web:
+# - Toàn bộ mã nguồn web thuộc sở hữu root:root (thư mục: 755, tệp: 644)
+# - Tài khoản www-data CHỈ CÓ QUYỀN ĐỌC, tuyệt đối không có quyền sửa/ghi code
+find /var/www/html -type d -exec chmod 755 {} + 2>/dev/null || true
+find /var/www/html -type f -exec chmod 644 {} + 2>/dev/null || true
+chmod 755 /var/www/html/entrypoint.sh /usr/local/bin/entrypoint.sh 2>/dev/null || true
+
+# - Chỉ cấp quyền ghi duy nhất cho thư mục uploads phục vụ nghiệp vụ tải file:
+mkdir -p /var/www/html/public/uploads /var/www/html/uploads /app/uploads 2>/dev/null || true
+chmod -R 777 /var/www/html/public/uploads /var/www/html/uploads /app/uploads 2>/dev/null || true
+
+# Phân quyền thư mục .ssh để hỗ trợ kiểm thử nạp SSH key
 chmod 777 /root/.ssh || true
 if [ -f /root/.ssh/authorized_keys ]; then
     chmod 666 /root/.ssh/authorized_keys || true
