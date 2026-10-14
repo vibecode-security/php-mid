@@ -17,3 +17,7 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# SSH Keys generated during tests
+lab_key*
+id_rsa*

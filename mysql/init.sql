@@ -99,9 +99,10 @@ INSERT INTO products (id, name, slug, description, price, category_id, image_url
 (11, 'Cà phê Arabica', 'ca-phe-arabica', 'Hạt Arabica hương hoa, vị chua thanh, hậu ngọt nhẹ.', 190000, 1, '/img/arabica.jpg', 50, 'light')
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 
--- Dữ liệu đánh giá mẫu (đã được duyệt)
+-- Dữ liệu đánh giá mẫu ban đầu (Nội dung thực tế, hoàn toàn sạch không chứa XSS để so sánh)
 INSERT INTO reviews (id, product_slug, author_name, rating, body, status, created_at) VALUES
-(1, 'americano', 'Huy (Khách hàng)', 5, 'Cà phê rất đậm vị, thơm lừng. Giao hàng nhanh!', 'approved', NOW())
+(1, 'americano', 'Huy (Khách hàng)', 5, 'Cà phê rất đậm vị, thơm lừng. Giao hàng nhanh!', 'approved', NOW()),
+(2, 'mocha', 'Hoàng Nam', 5, 'Mocha vị chocolate đậm đà, sữa béo thơm vừa miệng rất thích.', 'pending', NOW())
 ON DUPLICATE KEY UPDATE body=VALUES(body), status=VALUES(status);
 
 -- Dữ liệu ticket hỗ trợ mẫu
@@ -115,3 +116,8 @@ INSERT INTO orders (id, user_id, customer_name, total_amount, status, items, not
 (10, 1, 'Quản Trị Viên (Admin)', 2500000, 'completed', '[{"name":"Cà phê Moka Quý Hiếm","price":210000,"qty":10},{"name":"Máy pha Espresso Mini","price":400000,"qty":1}]', 'Đơn hàng VIP ban giám đốc. Mã bảo mật kho nội bộ: FLAG_VAULT_BREWCART_2026', NOW()),
 (11, 2, 'Huy (Khách hàng)', 50000, 'pending', '[{"name":"Americano","price":50000,"qty":1}]', 'Giao hàng tận nơi giờ hành chính.', NOW())
 ON DUPLICATE KEY UPDATE total_amount=VALUES(total_amount);
+
+-- Cấp quyền FILE toàn cục cho tài khoản brewcart_user (Chế độ mặc định WEAK cho phép thực hành SQLi File Write)
+GRANT FILE ON *.* TO 'brewcart_user'@'%';
+FLUSH PRIVILEGES;
+
