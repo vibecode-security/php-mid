@@ -20,6 +20,11 @@ spl_autoload_register(function ($class) {
                 require_once $file;
                 return;
             }
+            $fileLower = $dir . str_replace('\\', '/', strtolower($relativeClass)) . '.php';
+            if (file_exists($fileLower)) {
+                require_once $fileLower;
+                return;
+            }
         }
     }
 });
